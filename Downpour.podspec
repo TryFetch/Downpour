@@ -23,6 +23,6 @@ Downpour was built for [Fetch](http://getfetchapp.com) — a Put.io client — t
   s.ios.deployment_target = '8.0'
   s.tvos.deployment_target = '9.0'
 
-  s.source_files = 'Pod/**/*'
+  s.source_files = 'Sources/**/*'
 
 end
