@@ -16,7 +16,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Mr Show Name")
         XCTAssertEqual(downpour.season, "01")
         XCTAssertEqual(downpour.episode, "02")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 
@@ -25,7 +25,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "01")
         XCTAssertEqual(downpour.episode, "02")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 
@@ -34,7 +34,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "01")
         XCTAssertEqual(downpour.episode, "02")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 
@@ -43,7 +43,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show 1.0 Name")
         XCTAssertEqual(downpour.season, "01")
         XCTAssertEqual(downpour.episode, "03")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 
@@ -52,7 +52,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "06")
         XCTAssertEqual(downpour.episode, "01")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 
@@ -61,7 +61,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "06")
         XCTAssertEqual(downpour.episode, "01")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 
@@ -70,7 +70,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "06")
         XCTAssertEqual(downpour.episode, "01")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 
@@ -79,7 +79,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "06")
         XCTAssertEqual(downpour.episode, "01")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 
@@ -88,7 +88,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show Name-0")  // FIXME
         XCTAssertEqual(downpour.season, "01")
         XCTAssertEqual(downpour.episode, "02")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertEqual(downpour.year, "2010")
     }
 
@@ -97,7 +97,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show-Name")  // FIXME
         XCTAssertEqual(downpour.season, "06")
         XCTAssertEqual(downpour.episode, "01")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 
@@ -106,7 +106,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show_Name")  // FIXME
         XCTAssertEqual(downpour.season, "1")
         XCTAssertEqual(downpour.episode, "02")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 
@@ -115,7 +115,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "1")
         XCTAssertEqual(downpour.episode, "02")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 
@@ -124,7 +124,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "1")
         XCTAssertEqual(downpour.episode, "02")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 
@@ -133,7 +133,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "1")
         XCTAssertEqual(downpour.episode, "02")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 
@@ -142,7 +142,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "1")
         XCTAssertEqual(downpour.episode, "02")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 
@@ -151,7 +151,7 @@ class DownpourTests: XCTestCase {
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "1")
         XCTAssertEqual(downpour.episode, "02")
-        XCTAssertEqual(downpour.type, .Some(.TV))
+        XCTAssertEqual(downpour.type, .some(.tv))
         XCTAssertNil(downpour.year)
     }
 }

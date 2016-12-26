@@ -8,7 +8,7 @@
 
 import Foundation
 
-public class Downpour: CustomStringConvertible {
+open class Downpour: CustomStringConvertible {
 
     /// The raw string that has not yet been parsed by Downpour.
     var rawString: String
@@ -26,11 +26,11 @@ public class Downpour: CustomStringConvertible {
     /// Both the season and the episode together.
     var seasonEpisode: String? {
         get {
-            if let match = rawString.rangeOfString(patterns["season"]!, options: .RegularExpressionSearch) {
+            if let match = rawString.range(of: patterns["season"]!, options: .regularExpression) {
                 return rawString[match]
-            } else if let match = rawString.rangeOfString(patterns["altSeason"]!, options: .RegularExpressionSearch) {
+            } else if let match = rawString.range(of: patterns["altSeason"]!, options: .regularExpression) {
                 return rawString[match]
-            } else if let match = rawString.rangeOfString(patterns["altSeason2"]!, options: .RegularExpressionSearch) {
+            } else if let match = rawString.range(of: patterns["altSeason2"]!, options: .regularExpression) {
                 return rawString[match].cleanedString
             }
 
@@ -39,19 +39,19 @@ public class Downpour: CustomStringConvertible {
     }
 
     /// The TV Season - e.g. 02
-    public var season: String? {
+    open var season: String? {
         get {
             if let both = seasonEpisode {
 
                 if both.characters.count > 6 {
 
-                    let match = rawString.rangeOfString(patterns["altSeasonSingle"]!, options: .RegularExpressionSearch)
+                    let match = rawString.range(of: patterns["altSeasonSingle"]!, options: .regularExpression)
                     let string = rawString[match!]
 
                     let startIndex = string.startIndex
-                    let endIndex = string.startIndex.advancedBy(6)
+                    let endIndex = string.characters.index(string.startIndex, offsetBy: 6)
 
-                    return string.stringByReplacingCharactersInRange(startIndex...endIndex, withString: "").cleanedString
+                    return string.replacingCharacters(in: startIndex..<endIndex, with: "").cleanedString
 
                 } else if both.characters.count == 3 {
 
@@ -60,12 +60,12 @@ public class Downpour: CustomStringConvertible {
                 }
 
 
-                let charset = NSCharacterSet(charactersInString: "eExX")
-                let pieces = both.componentsSeparatedByCharactersInSet(charset)
+                let charset = CharacterSet(charactersIn: "eExX")
+                let pieces = both.components(separatedBy: charset)
 
                 if pieces[0].characters.count == 3 {
-                    let startIndex = pieces[0].startIndex.advancedBy(1)
-                    let endIndex = pieces[0].startIndex.advancedBy(2)
+                    let startIndex = pieces[0].characters.index(pieces[0].startIndex, offsetBy: 1)
+                    let endIndex = pieces[0].characters.index(pieces[0].startIndex, offsetBy: 2)
                     return pieces[0][startIndex...endIndex].cleanedString
                 }
 
@@ -77,30 +77,30 @@ public class Downpour: CustomStringConvertible {
     }
 
     /// The TV Episode - e.g. 22
-    public var episode: String? {
+    open var episode: String? {
         get {
             if let both = seasonEpisode {
 
                 if both.characters.count > 6 {
 
-                    let match = rawString.rangeOfString(patterns["altEpisodeSingle"]!, options: .RegularExpressionSearch)
+                    let match = rawString.range(of: patterns["altEpisodeSingle"]!, options: .regularExpression)
                     let string = rawString[match!]
 
                     let startIndex = string.startIndex
-                    let endIndex = string.startIndex.advancedBy(6)
+                    let endIndex = string.characters.index(string.startIndex, offsetBy: 6)
 
-                    return string.stringByReplacingCharactersInRange(startIndex...endIndex, withString: "").cleanedString
+                    return string.replacingCharacters(in: startIndex..<endIndex, with: "").cleanedString
 
                 } else if both.characters.count == 3 {
 
-                    let startIndex = both.startIndex.advancedBy(1)
-                    let endIndex = both.startIndex.advancedBy(2)
+                    let startIndex = both.characters.index(both.startIndex, offsetBy: 1)
+                    let endIndex = both.characters.index(both.startIndex, offsetBy: 2)
                     return both[startIndex...endIndex].cleanedString
 
                 }
 
-                let charset = NSCharacterSet(charactersInString: "eExX")
-                let pieces = both.componentsSeparatedByCharactersInSet(charset)
+                let charset = CharacterSet(charactersIn: "eExX")
+                let pieces = both.components(separatedBy: charset)
 
                 return pieces[1].cleanedString
             }
@@ -109,19 +109,19 @@ public class Downpour: CustomStringConvertible {
     }
 
     /// Is it TV or a Movie?
-    public var type: DownpourType {
+    open var type: DownpourType {
         get {
             if season != nil {
-                return .TV
+                return .tv
             }
-            return .Movie
+            return .movie
         }
     }
 
     /// Year of release
-    public var year: String? {
+    open var year: String? {
         get {
-            if let match = rawString.rangeOfString(patterns["year"]!, options: .RegularExpressionSearch) {
+            if let match = rawString.range(of: patterns["year"]!, options: .regularExpression) {
                 let found = rawString[match]
                 return found.cleanedString
             }
@@ -130,16 +130,16 @@ public class Downpour: CustomStringConvertible {
     }
 
     /// Title of the TV Show or Movie
-    public var title: String {
+    open var title: String {
         get {
 
-            if type == .TV {
+            if type == .tv {
 
-                if let se = rawString.rangeOfString(seasonEpisode!) where se.startIndex != rawString.startIndex { // check if there is actually a title before the episode string
-                    let endIndex = rawString.rangeOfString(seasonEpisode!)!.startIndex.advancedBy(-1)
+                if let se = rawString.range(of: seasonEpisode!), se.lowerBound != rawString.startIndex { // check if there is actually a title before the episode string
+                    let endIndex = rawString.index(rawString.range(of: seasonEpisode!)!.lowerBound, offsetBy: -1)
                     var string = rawString[rawString.startIndex...endIndex].cleanedString
                     if year != nil {
-                        let endIndex = rawString.rangeOfString(year!)!.startIndex.advancedBy(-1)
+                        let endIndex = rawString.index(rawString.range(of: year!)!.lowerBound, offsetBy: -1)
                         string = rawString[rawString.startIndex...endIndex].cleanedString
                     }
                     return string
@@ -148,7 +148,7 @@ public class Downpour: CustomStringConvertible {
                 return rawString.cleanedString
 
             } else if year != nil {
-                let endIndex = rawString.rangeOfString(year!)!.startIndex.advancedBy(-1)
+                let endIndex = rawString.index(rawString.range(of: year!)!.lowerBound, offsetBy: -1)
                 return rawString[rawString.startIndex...endIndex].cleanedString
             }
 
@@ -159,7 +159,7 @@ public class Downpour: CustomStringConvertible {
 
     // MARK: - CustomStringConvertible
     
-    public var description: String {
+    open var description: String {
        return "Title: \(title); Episode: \(episode); Season: \(season); Year: \(year)"
     }
 
