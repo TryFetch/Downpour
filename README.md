@@ -12,7 +12,7 @@ It can gather the following from a raw file name:
 
 ## Usage
 
-Using downpour is easy. Just create a new instance and it'll do the rest.
+Using Downpour is easy. Just create a new instance and it'll do the rest.
 
 ```swift
 let torrent = Downpour(string: filename)
