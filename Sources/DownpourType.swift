@@ -7,6 +7,6 @@
 //
 
 public enum DownpourType {
-    case TV
-    case Movie
+    case tv
+    case movie
 }

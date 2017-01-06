@@ -14,7 +14,7 @@ It can gather the following from a raw file name:
 
 Using downpour is easy. Just create a new instance and it'll do the rest.
 
-````swift
+```swift
 let torrent = Downpour(string: filename)
 
 let title = torrent.title
@@ -24,12 +24,12 @@ if downpour.type == .TV {
     let season = torrent.season
     let episode = torrent.episode
 }
-````
+```
 
 ## Installation
 
-Install manually by copying the contents of the `Pod` directory to your project or install via Cocoapods.
+Install manually by copying the contents of the `Sources` directory to your project or install via CocoaPods.
 
-````ruby
-pod 'Downpour', :git => 'git@github.com:steve228uk/Downpour.git'
-````
+```ruby
+pod 'Downpour'
+```
