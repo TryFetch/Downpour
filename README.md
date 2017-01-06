@@ -33,3 +33,5 @@ Install manually by copying the contents of the `Sources` directory to your proj
 ```ruby
 pod 'Downpour'
 ```
+
+**Note:** For Swift 2.3 please use `0.1.0`
