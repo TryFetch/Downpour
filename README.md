@@ -1,5 +1,5 @@
 # Downpour
-[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/steve228uk/Downpour/blob/master/LICENSE) [![Build Status](https://travis-ci.org/steve228uk/Downpour.svg?branch=master)](https://travis-ci.org/steve228uk/Downpour)
+[![license](https://img.shields.io/github/license/mashape/apistatus.svg?maxAge=2592000)](https://github.com/steve228uk/Downpour/blob/master/LICENSE) [![Build Status](https://travis-ci.org/TryFetch/Downpour.svg?branch=master)](https://travis-ci.org/TryFetch/Downpour)
 
 Downpour was built for [Fetch](http://getfetchapp.com) — a Put.io client — to parse TV & Movie information from downloaded files. It can be used on any platform that can run Swift as it only relies on Foundation.
 
