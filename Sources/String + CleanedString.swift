@@ -11,12 +11,10 @@ import Foundation
 extension String {
 
     var cleanedString: String {
-        get {
-            var cleaned = self
-            cleaned = cleaned.trimmingCharacters(in: CharacterSet(charactersIn: " -.([]{}))"))
-            cleaned = cleaned.replacingOccurrences(of: ".", with: " ")
-            return cleaned
-        }
+        var cleaned = self
+        cleaned = cleaned.trimmingCharacters(in: CharacterSet(charactersIn: " -.([]{}))"))
+        cleaned = cleaned.replacingOccurrences(of: ".", with: " ")
+        return cleaned
     }
 
 }
