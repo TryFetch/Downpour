@@ -109,25 +109,48 @@ open class Downpour: CustomStringConvertible {
         return nil
     }
 
+    private let musicExtensions: [String] = [
+                                             "aa", "aac", "aax", "act", "aiff",
+                                             "alac", "amr", "ape", "au", "awb",
+                                             "dct", "dss", "dvf", "flac", "gsm",
+                                             "iklax", "ivs", "m4a", "m4b", "m4p",
+                                             "mmf", "mp3", "mpc", "msv", "oga",
+                                             "mogg", "opus", "ra", "sln", "tta",
+                                             "vox", "wav", "wma", "wv"
+                                            ]
+    private let videoExtensions: [String] = [
+                                             "mkv", "flv", "vob", "ogv", "drc",
+                                             "gifv", "mng", "avi", "mov", "qt",
+                                             "wmv", "yuv", "rmvb", "asf", "amv",
+                                             "mp4", "m4p", "m4v", "mpg", "mp2",
+                                             "mpeg", "mpe", "mpv", "svi", "3g2",
+                                             "mx4", "roq", "nsv", "f4v", "f4p",
+                                             "f4a", "f4b"
+                                           ]
+
     /// Is it TV, Movie, or Audio?
     open var type: DownpourType {
-        if season != nil {
-            return .tv
+        let ext = fullPath.extension ?? ""
+        if videoExtensions.contains(ext) {
+            if season != nil {
+                return .tv
+            }
+            return .movie
+        } else if musicExtensions.contains(ext) {
+            return .music
+        } else {
+            // Get file metadata to check if it has song-related properties
+            #if os(macOS)
+            let asset = AVAsset(url: fullPath.url)
+            let commonMetadata = asset.commonMetadata
+            for metadata in commonMetadata where [AVMetadataCommonKeyType, AVMetadataCommonKeyFormat].contains(metadata.commonKey) {
+                print(metadata)
+            }
+            #else
+            // Not sure how to get file metadata on linux
+            #endif
+            return .unknown
         }
-        #if os(macOS)
-        return macOSIsAudio(fullPath.url) ? .music : .movie
-        #else
-        return linuxIsAudio(fullPath.url) ? .music : .movie
-        #endif
-    }
-
-    private func linuxIsAudio(_ url: URL) -> Bool {
-        return false
-    }
-
-    private func macOSIsAudio(_ url: URL) -> Bool {
-        let asset = AVAsset(url: url)
-        return false
     }
 
     /// Year of release
@@ -142,7 +165,6 @@ open class Downpour: CustomStringConvertible {
     /// Title of the TV Show or Movie
     open var title: String {
         if type == .tv {
-
             // Check if there is actually a title before the episode string
             if let se = rawString.range(of: seasonEpisode!), se.lowerBound != rawString.startIndex {
                 let endIndex = rawString.index(rawString.range(of: seasonEpisode!)!.lowerBound, offsetBy: -1)
@@ -162,6 +184,32 @@ open class Downpour: CustomStringConvertible {
         }
 
         return rawString.cleanedString
+    }
+
+    open var artist: String? {
+        guard type == .music else { return nil }
+        #if os(macOS)
+        let asset = AVAsset(url: fullPath.url)
+        let commonMetadata = asset.commonMetadata
+        for metadata in commonMetadata where metadata.commonKey == AVMetadataCommonKeyArtist {
+            return metadata.stringValue
+        }
+        #else
+            return nil
+        #endif
+    }
+
+    open var album: String? {
+        guard type == .music else { return nil }
+        #if os(macOS)
+        let asset = AVAsset(url: fullPath.url)
+        let commonMetadata = asset.commonMetadata
+        for metadata in commonMetadata where metadata.commonKey == AVMetadataCommonKeyAlbumName {
+            return metadata.stringValue
+        }
+        #else
+            return nil
+        #endif
     }
 
     // MARK: - CustomStringConvertible
