@@ -7,7 +7,11 @@
 //
 
 import Foundation
+import PathKit
+
+#if os(macOS)
 import AVFoundation
+#endif
 
 open class Downpour: CustomStringConvertible {
 
@@ -15,10 +19,10 @@ open class Downpour: CustomStringConvertible {
     var rawString: String
 
     /// The full path to the file
-    var fullPath: String
+    var fullPath: Path
 
     /// The patterns that will be used to fetch various pieces of information from the rawString.
-    let patterns: [String:String] = [
+    let patterns: [String: String] = [
         "season": "[Ss]?\\d{1,2}[EexX]\\d{1,2}",
         "altSeason": "[Ss]eason \\d{1,2} [Ee]pisode \\d{1,2}",
         "altSeasonSingle": "[Ss]eason \\d{1,2}",
@@ -110,10 +114,20 @@ open class Downpour: CustomStringConvertible {
         if season != nil {
             return .tv
         }
-        if let fileURL = URL(string: fullPath) {
-            let asset = AVAsset(url: fileURL)
-        }
-        return .movie
+        #if os(macOS)
+        return macOSIsAudio(fullPath.url) ? .music : .movie
+        #else
+        return linuxIsAudio(fullPath.url) ? .music : .movie
+        #endif
+    }
+
+    private func linuxIsAudio(_ url: URL) -> Bool {
+        return false
+    }
+
+    private func macOSIsAudio(_ url: URL) -> Bool {
+        let asset = AVAsset(url: url)
+        return false
     }
 
     /// Year of release
@@ -158,8 +172,14 @@ open class Downpour: CustomStringConvertible {
 
     // MARK: - Initializers
 
-    public init(string: String) {
-        rawString = string
+    public init(name: String, path: Path) {
+        rawString = name
+        fullPath = path.isFile ? path : path + name
+    }
+
+    public init(fullPath: Path) {
+        self.fullPath = fullPath
+        self.rawString = fullPath.lastComponent
     }
 
 }
