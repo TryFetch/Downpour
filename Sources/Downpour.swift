@@ -17,7 +17,7 @@ open class Downpour: CustomStringConvertible {
     /// The full path to the file
     var fullPath: Path
 
-    /// The metadata for the file (useful generally only for music files)
+    /// The metadata for the file (generally only useful for music files)
     lazy var metadata: Metadata? = {
         return try? Metadata(self.fullPath)
     }()
@@ -58,11 +58,9 @@ open class Downpour: CustomStringConvertible {
                 let endIndex = string.characters.index(string.startIndex, offsetBy: 6)
 
                 return string.replacingCharacters(in: startIndex..<endIndex, with: "").cleanedString
-
             } else if both.characters.count == 3 {
 
                 return both[both.startIndex...both.startIndex].cleanedString
-
             }
 
             let charset = CharacterSet(charactersIn: "eExX")
@@ -76,7 +74,6 @@ open class Downpour: CustomStringConvertible {
             }
 
             return pieces[0].cleanedString
-
         }
         return nil
     }()
@@ -93,12 +90,10 @@ open class Downpour: CustomStringConvertible {
                 let endIndex = string.characters.index(string.startIndex, offsetBy: 6)
 
                 return string.replacingCharacters(in: startIndex..<endIndex, with: "").cleanedString
-
             } else if chars.count == 3 {
                 let startIndex = chars.index(both.startIndex, offsetBy: 1)
                 let endIndex = chars.index(both.startIndex, offsetBy: 2)
                 return both[startIndex...endIndex].cleanedString
-
             }
 
             let charset = CharacterSet(charactersIn: "eExX")
@@ -109,6 +104,7 @@ open class Downpour: CustomStringConvertible {
         return nil
     }()
 
+    /// Guarenteed extensions for music files (according to Wikipedia)
     private let musicExtensions: [String] = [
                                              "aa", "aac", "aax", "act", "aiff",
                                              "alac", "amr", "ape", "au", "awb",
@@ -118,6 +114,7 @@ open class Downpour: CustomStringConvertible {
                                              "mogg", "opus", "ra", "sln", "tta",
                                              "vox", "wav", "wma", "wv"
                                             ]
+    /// Guarneteed extensions for video files (according to Wikipedia)
     private let videoExtensions: [String] = [
                                              "mkv", "flv", "vob", "ogv", "drc",
                                              "gifv", "mng", "avi", "mov", "qt",
@@ -128,24 +125,44 @@ open class Downpour: CustomStringConvertible {
                                              "f4a", "f4b"
                                            ]
 
-    /// Is it TV, Movie, or Audio?
+    /// Is it TV, Movie, or Music?
     lazy open var type: DownpourType = {
+        // Get the files extension
         let ext = self.fullPath.extension ?? ""
+
+        // Test to see if the extension is a video file extension
         if self.videoExtensions.contains(ext) {
+            // If we got a season name from the title, then it's a TV show
             if self.season != nil {
                 return .tv
             }
+            // Otherwise, it's a movie
             return .movie
+        // If the extension is an audio file extension
         } else if self.musicExtensions.contains(ext) {
+            // Then return that this is a music file
             return .music
+        // If we couldn't identify the format from the file extension, try and use the metadata
         } else {
+            // Try and get the format metadata from the file, else return unkown DownpourType
             guard let format = self.metadata?.format else { return .unknown }
+            #if os(Linux)
+            // This is a MIME Type, so split on the slash and check if the components contains the type
             let components = format.lowercased().components(separatedBy: "/")
             if components.contains("video") {
+                if self.season != nil {
+                    return .tv
+                }
                 return .movie
             } else if components.contains("audio") {
                 return .music
             }
+            #else
+            // I don't know what the format value is for AVAssets, so just print it for now
+            print(format)
+            #endif
+
+            // Returns unkown if the format is neither video nor audio
             return .unknown
         }
     }()
@@ -179,7 +196,6 @@ open class Downpour: CustomStringConvertible {
             }
 
             return self.rawString.cleanedString
-
         } else if self.type == .movie && self.year != nil {
             let endIndex = self.rawString.index(self.rawString.range(of: self.year!)!.lowerBound, offsetBy: -1)
             return self.rawString[self.rawString.startIndex...endIndex].cleanedString
@@ -190,14 +206,29 @@ open class Downpour: CustomStringConvertible {
         return self.rawString.cleanedString
     }()
 
+    /// Artist of the song/track. Returns nil if the type is not .music
     lazy var artist: String? = {
         guard self.type == .music else { return nil }
         return self.metadata?.artist
     }()
 
+    /// Album of the song/track. Returns nil if the type is not .music
     lazy var album: String? = {
         guard self.type == .music else { return nil }
         return self.metadata?.album
+    }()
+
+    /// Image data of song/track's album cover. Returns nil if the type is not .music
+    lazy var albumArtwork: Data? = {
+        guard self.type == .music else { return nil }
+        guard let dataString = self.metadata?.artwork else { return nil }
+        return Data(base64Encoded: dataString)
+    }()
+
+    /// Release date of the song/track. Returns nil if the type is not .music
+    lazy var releaseDate: Date? = {
+        guard self.type == .music else { return nil }
+        return self.metadata?.creationDate
     }()
 
     // MARK: - CustomStringConvertible
@@ -208,7 +239,7 @@ open class Downpour: CustomStringConvertible {
         } else if type == .movie {
             return "Title: \(title); Year: \(year)"
         } else if type == .music {
-            return "Title: \(title); Artist: \(artist); Album: \(album); ReleaseDate: \(year)"
+            return "Title: \(title); Artist: \(artist); Album: \(album); Year: \(year)"
         } else {
             return "Unkown media type. Cannot describe."
         }

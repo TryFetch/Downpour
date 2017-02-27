@@ -2,11 +2,7 @@ import Foundation
 import PathKit
 import JSON
 
-// Mac OS includes the AVMetadataCommonKeys in the AVFoundation framework,
-// along with the AVAsset class to make retriving file metadata easy
-#if os(macOS)
-import AVFoundation
-#else
+#if os(Linux)
 // On Linux we define our own metadata keys that correspond with what exiftool
 // uses for metadata key names
 private let AVMetadataCommonKeyTitle: String = "Title"
@@ -32,6 +28,10 @@ private let AVMetadataCommonKeyArtwork: String = "Picture"
 private let AVMetadataCommonKeyMake: String = ""
 private let AVMetadataCommonKeyModel: String = ""
 private let AVMetadataCommonKeySoftware: String = ""
+#else
+// Mac OS/iOS includes the AVMetadataCommonKeys in the AVFoundation framework,
+// along with the AVAsset class to make retriving file metadata easy
+import AVFoundation
 #endif
 
 class Metadata {
@@ -70,13 +70,19 @@ class Metadata {
     lazy var model: String? = { return self.getCommonMetadata(AVMetadataCommonKeyModel) }()
     lazy var software: String? = { return self.getCommonMetadata(AVMetadataCommonKeySoftware) }()
 
-    // Create a lazy date formatter for the attributes that require a date from
-    // string in the ISO 8601 format
+    /// A DateFormatter for the attributes that require a date from string in the ISO 8601 format
     lazy var dateFormatter: DateFormatter = {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ssZ"
         return dateFormatter
     }()
+
+    // The saved metadata items, so that we don't have to continually get the AVAsset or run exiftool
+    #if os(Linux)
+    private var metadataJSON: JSON?
+    #else
+    private var metadataItems: [AVMetadataItem]?
+    #endif
 
     /// The path to the file
     private var filepath: Path
@@ -94,16 +100,19 @@ class Metadata {
         try hasDependencies()
     }
 
+    /// Checks to verify the system has any required dependencies.
+    /// - Throws: If a dependency is missing
     private func hasDependencies() throws {
         #if os(Linux)
         let (rc, _) = execute("which exiftool")
         if rc != 0 {
             throw MetadataError.missingDependency(dependency: "exiftool",
-                helpText: "On Ubuntu systems, try installing the 'libimage-exiftool-perl' package")
+                helpText: "On Ubuntu systems, try installing the 'libimage-exiftool-perl' package.")
         }
         #endif
     }
 
+    /// Struct used to capture the stdout and stderr of a command
     private struct Output {
         var stdout: String?
         var stderr: String?
@@ -113,6 +122,13 @@ class Metadata {
         }
     }
 
+    /**
+     Executes a cli command
+
+     - Parameter command: The array of strings that form the command and arguments
+
+     - Returns: A tuple of the return code and output
+    */
     private func execute(_ command: String...) -> (Int32, Output) {
         let task = Process()
         task.launchPath = "/usr/bin/env"
@@ -131,35 +147,73 @@ class Metadata {
         return (task.terminationStatus, Output(stdout, stderr))
     }
 
+    /**
+     Get the common metadata for the specified common metadata key
+
+     - Parameter key: The common metadata key to retrieve from the common metadata for the file
+
+     - Returns: The string value of the common metadata, or nil. If an error occured, this will print it out
+    */
     public func getCommonMetadata(_ key: String) -> String? {
         do {
+            // Try and return the Common Metadata value
             return try getCM(key)
         } catch {
+            // Print the error that occurred
             print("Failed to get file metadata: \n\t\(error)")
         }
+        // Return nil if an error occurs
         return nil
     }
 
-    private func getCM(_ key: String) throws -> String? {
-        #if os(macOS)
-        let asset = AVAsset(url: filepath.url)
-        let metadataItems = AVMetadataItem.metadataItems(from: asset.commonMetadata, withKey: key, keySpace: nil)
-        guard metadataItems.count > 0 else {
-            throw MetadataError.missingMetadataKey(key: key)
-        }
-        return metadataItems.first?.stringValue
-        #else
-        let (rc, output) = execute("exiftool -j \(fullPath.path)")
-        guard rc == 0 else {
-            throw MetadataError.couldNotGetMetadata(error: output.stderr)
-        }
+    /**
+     Gets the common metadata for the key, throws errors if the key doesn't exist or if metadata could not be retrieved
+     - Parameter key: The common metadata key to retrieve from the common metadata for the file
 
-        let metadataJSON = JSON(output.stdout)
-        guard let property = try metadataJSON.get(key) else {
+     - Returns: The string value of the common metadata, or nil.
+    */
+    private func getCM(_ key: String) throws -> String? {
+        #if os(Linux)
+        // If we're running Linux, check to see if we've saved an exiftool metadata JSON object
+        if metadataJSON == nil {
+            // If not, run the exiftool command to get the file's metadata
+            let (rc, output) = execute("exiftool -b -All -j \(fullPath.path)")
+            // Throw an error if we failed to get the metadata
+            guard rc == 0 else {
+                throw MetadataError.couldNotGetMetadata(error: output.stderr)
+            }
+        }
+        // Try and retrieve the specified property
+        guard let property = try metadataJSON?.get(key) else {
+            // Throw an error if the key doesn't exist
             throw MetadataError.missingMetadataKey(key: key)
         }
+        // Otherwise, return the property
         return property
+        #else
+        // If we're on macOS/iOS/tvOS/watchOS, check to see if we've saced the common metadataItems
+        if metadataItems == nil {
+            // If not, get the AVAsset from the filepath url
+            let asset = AVAsset(url: filepath.url)
+            // Save the common metadata items
+            metadataItems = asset.commonMetadata
+            // Make sure the asset had common metadata items
+            guard let _ = metadataItems else {
+                // Throw an error because the asset either has no common metadata, or something happened
+                throw MetadataError.couldNotGetMetadata(error: "Unkown problem getting common metadata from AVAsset")
+            }
+        }
+        // Try and get the metadata for the specified key
+        let metadata = AVMetadataItem.metadataItems(from: metadataItems!, withKey: key, keySpace: nil)
+        // Throws an error if there is no common metadata for the key
+        guard metadata.count > 0 else {
+            throw MetadataError.missingMetadataKey(key: key)
+        }
+        // Return the first metadata item's string value
+        return metadata.first?.stringValue
         #endif
+
+        // Return nil if for some reason we haven't returned or thrown yet
         return nil
     }
 }
