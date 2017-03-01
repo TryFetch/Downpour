@@ -177,7 +177,7 @@ class Metadata {
         // If we're running Linux, check to see if we've saved an exiftool metadata JSON object
         if metadataJSON == nil {
             // If not, run the exiftool command to get the file's metadata
-            let (rc, output) = execute("exiftool -b -All -j \(fullPath.path)")
+            let (rc, output) = execute("exiftool -b -All -j \(filepath.path)")
             // Throw an error if we failed to get the metadata
             guard rc == 0 else {
                 throw MetadataError.couldNotGetMetadata(error: output.stderr)
@@ -212,8 +212,5 @@ class Metadata {
         // Return the first metadata item's string value
         return metadata.first?.stringValue
         #endif
-
-        // Return nil if for some reason we haven't returned or thrown yet
-        return nil
     }
 }
