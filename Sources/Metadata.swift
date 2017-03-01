@@ -1,8 +1,8 @@
 import Foundation
 import PathKit
-import JSON
 
 #if os(Linux)
+import JSON
 // On Linux we define our own metadata keys that correspond with what exiftool
 // uses for metadata key names
 private let AVMetadataCommonKeyTitle: String = "Title"
@@ -12,7 +12,7 @@ private let AVMetadataCommonKeyDescription: String = ""
 private let AVMetadataCommonKeyPublisher: String = "Copyright"
 private let AVMetadataCommonKeyContributor: String = ""
 private let AVMetadataCommonKeyCreationDate: String = "Date/Time Original"
-private let AVMetadataCommonKeyLastModifiedDate: String = AVMetadataCommonKeyCreationDate
+private let AVMetadataCommonKeyLastModifiedDate: String = ""
 private let AVMetadataCommonKeyType: String = "File Type"
 private let AVMetadataCommonKeyFormat: String = "MIME Type"
 private let AVMetadataCommonKeyIdentifier: String = ""
@@ -28,6 +28,9 @@ private let AVMetadataCommonKeyArtwork: String = "Picture"
 private let AVMetadataCommonKeyMake: String = ""
 private let AVMetadataCommonKeyModel: String = ""
 private let AVMetadataCommonKeySoftware: String = ""
+
+// On Linux, Process is still named Task
+typealias Process = Task
 #else
 // Mac OS/iOS includes the AVMetadataCommonKeys in the AVFoundation framework,
 // along with the AVAsset class to make retriving file metadata easy
@@ -79,7 +82,37 @@ class Metadata {
 
     // The saved metadata items, so that we don't have to continually get the AVAsset or run exiftool
     #if os(Linux)
-    private var metadataJSON: JSON?
+    private struct Metadata: JSONInitializable {
+        private var data: [String: String]
+
+        init(_ str: String) throws {
+            try self.init(json: JSON(str))
+        }
+
+        init(json: JSON) throws {
+            data = [:]
+
+            // Required values. If there are errors here, throw
+            data[AVMetadataCommonKeyTitle] = try json.get(AVMetadataCommonKeyTitle)
+            data[AVMetadataCommonKeyFormat] = try json.get(AVMetadataCommonKeyFormat)
+
+            // Optional values, ignore errors and set to nil instead
+            data[AVMetadataCommonKeyPublisher] = try? json.get(AVMetadataCommonKeyPublisher)
+            data[AVMetadataCommonKeyCreationDate] = try? json.get(AVMetadataCommonKeyCreationDate)
+            data[AVMetadataCommonKeyType] = try? json.get(AVMetadataCommonKeyType)
+            data[AVMetadataCommonKeyCopyrights] = try? json.get(AVMetadataCommonKeyCopyrights)
+            data[AVMetadataCommonKeyAlbumName] = try? json.get(AVMetadataCommonKeyAlbumName)
+            data[AVMetadataCommonKeyArtist] = try? json.get(AVMetadataCommonKeyArtist)
+            data[AVMetadataCommonKeyArtwork] = try? json.get(AVMetadataCommonKeyArtwork)
+        }
+
+        public func get(_ key: String) -> String? {
+            guard data.keys.contains(key) else { return nil }
+            return data[key]
+        }
+    }
+
+    private var metadataJSON: Metadata?
     #else
     private var metadataItems: [AVMetadataItem]?
     #endif
@@ -112,6 +145,7 @@ class Metadata {
         #endif
     }
 
+    #if os(Linux)
     /// Struct used to capture the stdout and stderr of a command
     private struct Output {
         var stdout: String?
@@ -146,6 +180,7 @@ class Metadata {
         task.waitUntilExit()
         return (task.terminationStatus, Output(stdout, stderr))
     }
+    #endif
 
     /**
      Get the common metadata for the specified common metadata key
@@ -177,14 +212,22 @@ class Metadata {
         // If we're running Linux, check to see if we've saved an exiftool metadata JSON object
         if metadataJSON == nil {
             // If not, run the exiftool command to get the file's metadata
-            let (rc, output) = execute("exiftool -b -All -j \(filepath.path)")
+            let (rc, output) = execute("exiftool -b -All -j \(filepath.absolute)")
             // Throw an error if we failed to get the metadata
             guard rc == 0 else {
-                throw MetadataError.couldNotGetMetadata(error: output.stderr)
+                var err: String = ""
+                if let stderr = output.stderr {
+                    err = stderr
+                }
+                throw MetadataError.couldNotGetMetadata(error: err)
             }
+            guard let stdout = output.stdout else {
+                throw MetadataError.couldNotGetMetadata(error: "File does not contain any metadata")
+            }
+            metadataJSON = try Metadata(stdout)
         }
         // Try and retrieve the specified property
-        guard let property = try metadataJSON?.get(key) else {
+        guard let property = metadataJSON?.get(key) else {
             // Throw an error if the key doesn't exist
             throw MetadataError.missingMetadataKey(key: key)
         }
