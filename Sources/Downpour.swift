@@ -123,15 +123,20 @@ open class Downpour: CustomStringConvertible {
                                              "mpeg", "mpe", "mpv", "svi", "3g2",
                                              "mx4", "roq", "nsv", "f4v", "f4p",
                                              "f4a", "f4b"
-                                           ]
+                                            ]
+
+    /// Guarenteed extensions for subtitle files
+    private let subtitleExtensions: [String] = [
+                                                "srt", "smi", "ssa", "ass", "vtt"
+                                               ]
 
     /// Is it TV, Movie, or Music?
     lazy open var type: DownpourType = {
         // Get the files extension
-        let ext = self.fullPath.extension ?? ""
+        let ext = self.fullPath.extension?.lowercased() ?? ""
 
-        // Test to see if the extension is a video file extension
-        if self.videoExtensions.contains(ext) {
+        // Test to see if the extension is a video file extension (treat subtitles like video files too)
+        if self.videoExtensions.contains(ext) || self.subtitleExtensions.contains.(ext) {
             // If we got a season name from the title, then it's a TV show
             if self.season != nil {
                 return .tv
