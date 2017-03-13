@@ -212,26 +212,26 @@ open class Downpour: CustomStringConvertible {
     }()
 
     /// Artist of the song/track. Returns nil if the type is not .music
-    lazy var artist: String? = {
+    lazy open var artist: String? = {
         guard self.type == .music else { return nil }
         return self.metadata?.artist
     }()
 
     /// Album of the song/track. Returns nil if the type is not .music
-    lazy var album: String? = {
+    lazy open var album: String? = {
         guard self.type == .music else { return nil }
         return self.metadata?.album
     }()
 
     /// Image data of song/track's album cover. Returns nil if the type is not .music
-    lazy var albumArtwork: Data? = {
+    lazy open var albumArtwork: Data? = {
         guard self.type == .music else { return nil }
         guard let dataString = self.metadata?.artwork else { return nil }
         return Data(base64Encoded: dataString)
     }()
 
     /// Release date of the song/track. Returns nil if the type is not .music
-    lazy var releaseDate: Date? = {
+    lazy open var releaseDate: Date? = {
         guard self.type == .music else { return nil }
         return self.metadata?.creationDate
     }()

@@ -95,7 +95,7 @@ class Metadata {
             // Required values. If there are errors here, throw
             data[AVMetadataCommonKeyTitle] = try json.get(AVMetadataCommonKeyTitle)
             data[AVMetadataCommonKeyFormat] = try json.get(AVMetadataCommonKeyFormat)
-            
+
             // Optional values, ignore errors and set to nil instead
             data[AVMetadataCommonKeyPublisher] = try? json.get(AVMetadataCommonKeyPublisher)
             data[AVMetadataCommonKeyCreationDate] = try? json.get(AVMetadataCommonKeyCreationDate)
