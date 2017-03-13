@@ -24,11 +24,11 @@ open class Downpour: CustomStringConvertible {
 
     /// The patterns that will be used to fetch various pieces of information from the rawString.
     let patterns: [String: String] = [
-        "season": "[Ss]?\\d{1,2}[EexX]\\d{1,2}",
+        "season": "[Ss]?\\d{1,2}[EexX-]\\d{1,2}",
         "altSeason": "[Ss]eason \\d{1,2} [Ee]pisode \\d{1,2}",
         "altSeasonSingle": "[Ss]eason \\d{1,2}",
         "altEpisodeSingle": "[Ee]pisode \\d{1,2}",
-        "altSeason2": "[ .-]\\d{3}[ .-]",
+        "altSeason2": "[ \\.-]\\d{3}[ .-]",
         "year": "[(\\. \\[](19|20)\\d{2}[\\] \\.)]"
     ]
 
@@ -63,7 +63,7 @@ open class Downpour: CustomStringConvertible {
                 return both[both.startIndex...both.startIndex].cleanedString
             }
 
-            let charset = CharacterSet(charactersIn: "eExX")
+            let charset = CharacterSet(charactersIn: "eExX-")
             let pieces = both.components(separatedBy: charset)
 
             let chars = pieces[0].characters
