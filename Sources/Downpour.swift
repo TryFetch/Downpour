@@ -136,7 +136,7 @@ open class Downpour: CustomStringConvertible {
         let ext = self.fullPath.extension?.lowercased() ?? ""
 
         // Test to see if the extension is a video file extension (treat subtitles like video files too)
-        if self.videoExtensions.contains(ext) || self.subtitleExtensions.contains.(ext) {
+        if self.videoExtensions.contains(ext) || self.subtitleExtensions.contains(ext) {
             // If we got a season name from the title, then it's a TV show
             if self.season != nil {
                 return .tv
