@@ -48,9 +48,7 @@ open class Downpour: CustomStringConvertible {
     /// The TV Season - e.g. 02
     lazy open var season: String? = {
         if let both = self.seasonEpisode {
-
-            if both.characters.count > 6 {
-
+            guard both.characters.count <= 6 else {
                 let match = self.rawString.range(of: self.patterns["altSeasonSingle"]!, options: .regularExpression)
                 let string = self.rawString[match!]
 
@@ -58,16 +56,17 @@ open class Downpour: CustomStringConvertible {
                 let endIndex = string.characters.index(string.startIndex, offsetBy: 6)
 
                 return string.replacingCharacters(in: startIndex..<endIndex, with: "").cleanedString
-            } else if both.characters.count == 3 {
+            }
 
+            guard both.characters.count != 3 else {
                 return both[both.startIndex...both.startIndex].cleanedString
             }
 
-            let charset = CharacterSet(charactersIn: "eExX-")
+            let charset = CharacterSet(charactersIn: "eExX-.")
             let pieces = both.components(separatedBy: charset)
 
             let chars = pieces[0].characters
-            if chars.count == 3 {
+            guard chars.count != 3 else {
                 let startIndex = chars.index(pieces[0].startIndex, offsetBy: 1)
                 let endIndex = chars.index(pieces[0].startIndex, offsetBy: 2)
                 return pieces[0][startIndex...endIndex].cleanedString
@@ -82,7 +81,8 @@ open class Downpour: CustomStringConvertible {
     lazy open var episode: String? = {
         if let both = self.seasonEpisode {
             let chars = both.characters
-            if chars.count > 6 {
+
+            guard chars.count <= 6 else {
                 let match = self.rawString.range(of: self.patterns["altEpisodeSingle"]!, options: .regularExpression)
                 let string = self.rawString[match!]
 
@@ -90,13 +90,14 @@ open class Downpour: CustomStringConvertible {
                 let endIndex = string.characters.index(string.startIndex, offsetBy: 6)
 
                 return string.replacingCharacters(in: startIndex..<endIndex, with: "").cleanedString
-            } else if chars.count == 3 {
+            }
+            guard chars.count != 3 else {
                 let startIndex = chars.index(both.startIndex, offsetBy: 1)
                 let endIndex = chars.index(both.startIndex, offsetBy: 2)
                 return both[startIndex...endIndex].cleanedString
             }
 
-            let charset = CharacterSet(charactersIn: "eExX")
+            let charset = CharacterSet(charactersIn: "eExX-.")
             let pieces = both.components(separatedBy: charset)
 
             return pieces[1].cleanedString
