@@ -24,7 +24,7 @@ open class Downpour: CustomStringConvertible {
 
     /// The patterns that will be used to fetch various pieces of information from the rawString.
     let patterns: [String: String] = [
-        "season": "[Ss]?\\d{1,2}[EexX-]\\d{1,2}",
+        "season": "[Ss]?\\d{1,2}[EexX-\.]\\d{1,2}",
         "altSeason": "[Ss]eason \\d{1,2} [Ee]pisode \\d{1,2}",
         "altSeasonSingle": "[Ss]eason \\d{1,2}",
         "altEpisodeSingle": "[Ee]pisode \\d{1,2}",
