@@ -28,7 +28,7 @@ open class Downpour: CustomStringConvertible {
         "altSeason": "[Ss]eason \\d{1,2} [Ee]pisode \\d{1,2}",
         "altSeasonSingle": "[Ss]eason \\d{1,2}",
         "altEpisodeSingle": "[Ee]pisode \\d{1,2}",
-        "altSeason2": "[ \\.\\-]\\d{3}[ \\.\\-]",
+        "altSeason2": "[ \\.\\-\\[]\\d{3}[ \\.\\-\\]]",
         "year": "[(\\. \\[](19|20)\\d{2}[\\] \\.)]"
     ]
 
