@@ -24,22 +24,24 @@ open class Downpour: CustomStringConvertible {
 
     /// The patterns that will be used to fetch various pieces of information from the rawString.
     let patterns: [String: String] = [
-        "season": "[Ss]?\\d{1,2}[EexX\\-\\.]\\d{1,2}",
+        "season": "[Ss]?\\d{1,2}[EexX\\-\\.]\\d{1,2}[^0-9]",
         "altSeason": "[Ss]eason \\d{1,2} [Ee]pisode \\d{1,2}",
         "altSeasonSingle": "[Ss]eason \\d{1,2}",
         "altEpisodeSingle": "[Ee]pisode \\d{1,2}",
         "altSeason2": "[ \\.\\-\\[]\\d{3}[ \\.\\-\\]]",
-        "year": "[(\\. \\[](19|20)\\d{2}[\\] \\.)]"
+        "year": "[\\(\\. \\[](19|20)\\d{2}[\\] \\.\\)]"
     ]
 
     /// Both the season and the episode together.
     lazy open var seasonEpisode: String? = {
-        if let match = self.rawString.range(of: self.patterns["season"]!, options: .regularExpression) {
+        if var match = self.rawString.range(of: self.patterns["season"]!, options: .regularExpression) {
+            match = match.lowerBound..<match.upperBound
             return self.rawString[match]
         } else if let match = self.rawString.range(of: self.patterns["altSeason"]!, options: .regularExpression) {
             return self.rawString[match]
         } else if let match = self.rawString.range(of: self.patterns["altSeason2"]!, options: .regularExpression) {
-            return self.rawString[match].cleanedString
+            let str = self.rawString[match].cleanedString
+            guard ["264", "720"].contains(str[1...3]) else { return str }
         }
 
         return nil
@@ -139,7 +141,7 @@ open class Downpour: CustomStringConvertible {
         // Test to see if the extension is a video file extension (treat subtitles like video files too)
         if self.videoExtensions.contains(ext) || self.subtitleExtensions.contains(ext) {
             // If we got a season name from the title, then it's a TV show
-            if self.season != nil {
+            if self.season != nil && Int(self.episode ?? "50") ?? 50 < 50 {
                 return .tv
             }
             // Otherwise, it's a movie
