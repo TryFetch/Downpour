@@ -28,9 +28,6 @@ private let AVMetadataCommonKeyArtwork: String = "Picture"
 private let AVMetadataCommonKeyMake: String = ""
 private let AVMetadataCommonKeyModel: String = ""
 private let AVMetadataCommonKeySoftware: String = ""
-
-// On Linux, Process is still named Task
-typealias Process = Task
 #else
 // Mac OS/iOS includes the AVMetadataCommonKeys in the AVFoundation framework,
 // along with the AVAsset class to make retriving file metadata easy

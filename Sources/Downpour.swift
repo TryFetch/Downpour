@@ -242,13 +242,14 @@ open class Downpour: CustomStringConvertible {
     // MARK: - CustomStringConvertible
 
     open var description: String {
-        if type == .tv {
-            return "Title: \(title); Episode: \(episode); Season: \(season); Year: \(year)"
-        } else if type == .movie {
-            return "Title: \(title); Year: \(year)"
-        } else if type == .music {
-            return "Title: \(title); Artist: \(artist); Album: \(album); Year: \(year)"
-        } else {
+        switch type {
+        case .tv:
+            return "Title: \(title); Episode: \(episode ?? "nil"); Season: \(season ?? "nil"); Year: \(year ?? "nil")"
+        case .movie:
+            return "Title: \(title); Year: \(year ?? "nil")"
+        case .music:
+            return "Title: \(title); Artist: \(artist ?? "nil"); Album: \(album ?? "nil"); Year: \(year ?? "nil")"
+        default:
             return "Unkown media type. Cannot describe."
         }
     }
