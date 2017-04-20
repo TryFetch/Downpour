@@ -8,8 +8,5 @@ dependencies.append(.Package(url: "https://github.com/vdka/JSON.git", majorVersi
 
 let package = Package(
   name: "Downpour",
-  dependencies: dependencies,
-  exclude: [
-      "Tests"
-  ]
+  dependencies: dependencies
 )

@@ -24,22 +24,29 @@ open class Downpour: CustomStringConvertible {
 
     /// The patterns that will be used to fetch various pieces of information from the rawString.
     let patterns: [String: String] = [
-        "season": "[Ss]?\\d{1,2}[EexX\\-\\.]\\d{1,2}[^0-9]",
-        "altSeason": "[Ss]eason \\d{1,2} [Ee]pisode \\d{1,2}",
-        "altSeasonSingle": "[Ss]eason \\d{1,2}",
-        "altEpisodeSingle": "[Ee]pisode \\d{1,2}",
-        "altSeason2": "[ \\.\\-\\[]\\d{3}[ \\.\\-\\]]",
-        "year": "[\\(\\. \\[](19|20)\\d{2}[\\] \\.\\)]"
+        "pretty": "S\\d{1,2}[\\-\\.\\s_]?E\\d{1,2}",
+        "tricky": "[^\\d]\\d{1,2}[X\\-\\.\\s_]\\d{1,2}[^\\d]?",
+        "combined": "(?:S)?)\\d{1,2}[EX\\-\\.\\s_]\\d{1,2}[^\\d]?",
+        "altSeason": "Season \\d{1,2} Episode \\d{1,2}",
+        "altSeasonSingle": "Season \\d{1,2}",
+        "altEpisodeSingle": "Episode \\d{1,2}",
+        "altSeason2": "[\\s_\\.\\-\\[]\\d{3}[\\s_\\.\\-\\]]",
+        "year": "[\\(?:\\.\\s_\\[](?:19|20)\\d{2}[\\]\\s_\\.\\)]"
     ]
 
     /// Both the season and the episode together.
     lazy open var seasonEpisode: String? = {
-        if var match = self.rawString.range(of: self.patterns["season"]!, options: .regularExpression) {
+        if let match = self.rawString.range(of: self.patterns["pretty"]!, options: [.regularExpression, .caseInsensitive]) {
+            return self.rawString[match]
+        } else if var match = self.rawString.range(of: self.patterns["tricky"]!, options: [.regularExpression, .caseInsensitive]) {
+            match = self.rawString.index(after: match.lowerBound)..<match.upperBound
+            return self.rawString[match]
+        } else if var match = self.rawString.range(of: self.patterns["combined"]!, options: [.regularExpression, .caseInsensitive]) {
             match = match.lowerBound..<match.upperBound
             return self.rawString[match]
-        } else if let match = self.rawString.range(of: self.patterns["altSeason"]!, options: .regularExpression) {
+        } else if let match = self.rawString.range(of: self.patterns["altSeason"]!, options: [.regularExpression, .caseInsensitive]) {
             return self.rawString[match]
-        } else if let match = self.rawString.range(of: self.patterns["altSeason2"]!, options: .regularExpression) {
+        } else if let match = self.rawString.range(of: self.patterns["altSeason2"]!, options: [.regularExpression, .caseInsensitive]) {
             let str = self.rawString[match].cleanedString
             guard ["264", "720"].contains(str[1...3]) else { return str }
         }
@@ -49,9 +56,9 @@ open class Downpour: CustomStringConvertible {
 
     /// The TV Season - e.g. 02
     lazy open var season: String? = {
-        if let both = self.seasonEpisode {
-            guard both.characters.count <= 6 else {
-                let match = self.rawString.range(of: self.patterns["altSeasonSingle"]!, options: .regularExpression)
+        if let both = self.seasonEpisode?.cleanedString {
+            guard both.characters.count <= 7 else {
+                let match = self.rawString.range(of: self.patterns["altSeasonSingle"]!, options: [.regularExpression, .caseInsensitive])
                 let string = self.rawString[match!]
 
                 let startIndex = string.startIndex
@@ -64,14 +71,13 @@ open class Downpour: CustomStringConvertible {
                 return both[both.startIndex...both.startIndex].cleanedString
             }
 
-            let charset = CharacterSet(charactersIn: "eExX-.")
+            let charset = CharacterSet(charactersIn: "eExX-. _")
             let pieces = both.components(separatedBy: charset)
 
             let chars = pieces[0].characters
-            guard chars.count != 3 else {
-                let startIndex = chars.index(pieces[0].startIndex, offsetBy: 1)
-                let endIndex = chars.index(pieces[0].startIndex, offsetBy: 2)
-                return pieces[0][startIndex...endIndex].cleanedString
+            guard chars.count <= 2 && chars.count >= 1 else {
+                let startIndex = pieces[0].index(after: pieces[0].startIndex)
+                return pieces[0][startIndex..<pieces[0].endIndex].cleanedString
             }
 
             return pieces[0].cleanedString
@@ -81,11 +87,11 @@ open class Downpour: CustomStringConvertible {
 
     /// The TV Episode - e.g. 22
     lazy open var episode: String? = {
-        if let both = self.seasonEpisode {
+        if let both = self.seasonEpisode?.cleanedString {
             let chars = both.characters
 
-            guard chars.count <= 6 else {
-                let match = self.rawString.range(of: self.patterns["altEpisodeSingle"]!, options: .regularExpression)
+            guard chars.count <= 7 else {
+                let match = self.rawString.range(of: self.patterns["altEpisodeSingle"]!, options: [.regularExpression, .caseInsensitive])
                 let string = self.rawString[match!]
 
                 let startIndex = string.startIndex
@@ -135,50 +141,54 @@ open class Downpour: CustomStringConvertible {
 
     /// Is it TV, Movie, or Music?
     lazy open var type: DownpourType = {
-        // Get the files extension
-        let ext = self.fullPath.extension?.lowercased() ?? ""
-
-        // Test to see if the extension is a video file extension (treat subtitles like video files too)
-        if self.videoExtensions.contains(ext) || self.subtitleExtensions.contains(ext) {
-            // If we got a season name from the title, then it's a TV show
+        if self.fullPath.string != self.rawString, let ext = self.fullPath.extension?.lowercased() {
+            // Test to see if the extension is a video file extension (treat subtitles like video files too)
+            if self.videoExtensions.contains(ext) || self.subtitleExtensions.contains(ext) {
+                // If we got a season name from the title, then it's a TV show
+                if self.season != nil && Int(self.episode ?? "50") ?? 50 < 50 {
+                    return .tv
+                }
+                // Otherwise, it's a movie
+                return .movie
+            // If the extension is an audio file extension
+            } else if self.musicExtensions.contains(ext) {
+                // Then return that this is a music file
+                return .music
+            // If we couldn't identify the format from the file extension, try and use the metadata
+            } else {
+                // Try and get the format metadata from the file, else return unkown DownpourType
+                guard let format = self.metadata?.format else { return .unknown }
+                #if os(Linux)
+                // This is a MIME Type, so split on the slash and check if the components contains the type
+                let components = format.lowercased().components(separatedBy: "/")
+                if components.contains("video") {
+                    if self.season != nil {
+                        return .tv
+                    }
+                    return .movie
+                } else if components.contains("audio") {
+                    return .music
+                }
+                #else
+                // I don't know what the format value is for AVAssets, so just print it for now
+                print(format)
+                #endif
+    
+                // Returns unkown if the format is neither video nor audio
+                return .unknown
+            }
+        } else {
             if self.season != nil && Int(self.episode ?? "50") ?? 50 < 50 {
                 return .tv
             }
-            // Otherwise, it's a movie
             return .movie
-        // If the extension is an audio file extension
-        } else if self.musicExtensions.contains(ext) {
-            // Then return that this is a music file
-            return .music
-        // If we couldn't identify the format from the file extension, try and use the metadata
-        } else {
-            // Try and get the format metadata from the file, else return unkown DownpourType
-            guard let format = self.metadata?.format else { return .unknown }
-            #if os(Linux)
-            // This is a MIME Type, so split on the slash and check if the components contains the type
-            let components = format.lowercased().components(separatedBy: "/")
-            if components.contains("video") {
-                if self.season != nil {
-                    return .tv
-                }
-                return .movie
-            } else if components.contains("audio") {
-                return .music
-            }
-            #else
-            // I don't know what the format value is for AVAssets, so just print it for now
-            print(format)
-            #endif
-
-            // Returns unkown if the format is neither video nor audio
-            return .unknown
         }
     }()
 
     /// Year of release
     lazy open var year: String? = {
-        if [DownpourType.movie, DownpourType.tv].contains(self.type) {
-            if let match = self.rawString.range(of: self.patterns["year"]!, options: .regularExpression) {
+        if [.movie, .tv].contains(self.type) {
+            if let match = self.rawString.range(of: self.patterns["year"]!, options: [.regularExpression, .caseInsensitive]) {
                 let found = self.rawString[match]
                 return found.cleanedString
             }
@@ -191,27 +201,38 @@ open class Downpour: CustomStringConvertible {
 
     /// Title of the TV Show or Movie
     lazy open var title: String = {
+        var title: String?
         if self.type == .tv {
             // Check if there is actually a title before the episode string
             if let se = self.rawString.range(of: self.seasonEpisode!), se.lowerBound != self.rawString.startIndex {
                 let endIndex = self.rawString.index(se.lowerBound, offsetBy: -1)
-                var string = self.rawString[self.rawString.startIndex...endIndex].cleanedString
+                var string = self.rawString[self.rawString.startIndex...endIndex]
                 if self.year != nil {
                     let endIndex = self.rawString.index(self.rawString.range(of: self.year!)!.lowerBound, offsetBy: -1)
-                    string = self.rawString[self.rawString.startIndex...endIndex].cleanedString
+                    string = self.rawString[self.rawString.startIndex...endIndex]
                 }
-                return string
+                title = string
             }
-
-            return self.rawString.cleanedString
         } else if self.type == .movie && self.year != nil {
             let endIndex = self.rawString.index(self.rawString.range(of: self.year!)!.lowerBound, offsetBy: -1)
-            return self.rawString[self.rawString.startIndex...endIndex].cleanedString
-        } else if self.type == .music, let title = self.metadata?.title {
-            return title
+            title = self.rawString[self.rawString.startIndex...endIndex]
+        } else if self.type == .music {
+            title = self.metadata?.title
         }
 
-        return self.rawString.cleanedString
+        if let t = title {
+            var clean = t.cleanedString
+            // Check to see if anything like a 2.0 got cleaned in the name
+            if let uncleanMatch = t.range(of: "\\d+\\.\\d+", options: .regularExpression),
+               let tooCleanMatch = clean.range(of: "\\d+ \\d+", options: .regularExpression),
+               uncleanMatch == tooCleanMatch {
+                let replacement = clean[tooCleanMatch].replacingOccurrences(of: " ", with: ".")
+                clean = clean.replacingOccurrences(of: clean[tooCleanMatch], with: replacement)
+            }
+            return clean
+        } else {
+            return self.rawString.cleanedString
+        }
     }()
 
     /// Artist of the song/track. Returns nil if the type is not .music
@@ -256,9 +277,13 @@ open class Downpour: CustomStringConvertible {
 
     // MARK: - Initializers
 
-    public init(name: String, path: Path) {
+    public init(name: String, path: Path? = nil) {
         rawString = name
-        fullPath = path.isFile ? path : path + name
+        if let p = path {
+            fullPath = p.isFile ? p : p + name
+        } else {
+            fullPath = Path(name)
+        }
     }
 
     public init(fullPath: Path) {
