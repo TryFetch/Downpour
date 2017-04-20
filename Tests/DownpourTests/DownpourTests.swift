@@ -7,12 +7,23 @@
 //
 
 import XCTest
-import Downpour
+@testable import Downpour
 
 
 class DownpourTests: XCTestCase {
+
+	override func setUp() {
+        super.setUp()
+        // Put setup code here. This method is called before the invocation of each test method in the class.
+    }
+
+    override func tearDown() {
+        // Put teardown code here. This method is called after the invocation of each test method in the class.
+        super.tearDown()
+    }
+
     func testStandardShow1() {
-        let downpour = Downpour(string: "Mr.Show.Name.S01E02.Source.Quality.Etc-Group")
+        let downpour = Downpour(name: "Mr.Show.Name.S01E02.Source.Quality.Etc-Group")
         XCTAssertEqual(downpour.title, "Mr Show Name")
         XCTAssertEqual(downpour.season, "01")
         XCTAssertEqual(downpour.episode, "02")
@@ -21,7 +32,7 @@ class DownpourTests: XCTestCase {
     }
 
     func testStandardShow2() {
-        let downpour = Downpour(string: "Show.Name.S01E02")
+        let downpour = Downpour(name: "Show.Name.S01E02")
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "01")
         XCTAssertEqual(downpour.episode, "02")
@@ -30,7 +41,7 @@ class DownpourTests: XCTestCase {
     }
 
     func testStandardShow3() {
-        let downpour = Downpour(string: "Show Name - S01E02 - My Ep Name")
+        let downpour = Downpour(name: "Show Name - S01E02 - My Ep Name")
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "01")
         XCTAssertEqual(downpour.episode, "02")
@@ -38,9 +49,9 @@ class DownpourTests: XCTestCase {
         XCTAssertNil(downpour.year)
     }
 
-    func xtestStandardShow4() {
-        let downpour = Downpour(string: "Show.1.0.Name.S01.E03.My.Ep.Name-Group")
-        XCTAssertEqual(downpour.title, "Show 1.0 Name")
+    func testStandardShow4() {
+        let downpour = Downpour(name: "Show.2.0.Name.S01.E03.My.Ep.Name-Group")
+        XCTAssertEqual(downpour.title, "Show 2.0 Name")
         XCTAssertEqual(downpour.season, "01")
         XCTAssertEqual(downpour.episode, "03")
         XCTAssertEqual(downpour.type, .some(.tv))
@@ -48,7 +59,7 @@ class DownpourTests: XCTestCase {
     }
 
     func testStandardShow5() {
-        let downpour = Downpour(string: "Show Name - S06E01 - 2009-12-20 - Ep Name")
+        let downpour = Downpour(name: "Show Name - S06E01 - 2009-12-20 - Ep Name")
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "06")
         XCTAssertEqual(downpour.episode, "01")
@@ -57,7 +68,7 @@ class DownpourTests: XCTestCase {
     }
 
     func testStandardShow6() {
-        let downpour = Downpour(string: "Show Name - S06E01 - -30-")
+        let downpour = Downpour(name: "Show Name - S06E01 - -30-")
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "06")
         XCTAssertEqual(downpour.episode, "01")
@@ -66,7 +77,7 @@ class DownpourTests: XCTestCase {
     }
 
     func testStandardShow7() {
-        let downpour = Downpour(string: "Show.Name.S06E01.Other.WEB-DL")
+        let downpour = Downpour(name: "Show.Name.S06E01.Other.WEB-DL")
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "06")
         XCTAssertEqual(downpour.episode, "01")
@@ -75,7 +86,7 @@ class DownpourTests: XCTestCase {
     }
 
     func testStandardShow8() {
-        let downpour = Downpour(string: "Show.Name.S06E01 Some-Stuff Here")
+        let downpour = Downpour(name: "Show.Name.S06E01 Some-Stuff Here")
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "06")
         XCTAssertEqual(downpour.episode, "01")
@@ -84,7 +95,7 @@ class DownpourTests: XCTestCase {
     }
 
     func testStandardShow9() {
-        let downpour = Downpour(string: "Show.Name-0.2010.S01E02.Source.Quality.Etc-Group")
+        let downpour = Downpour(name: "Show.Name-0.2010.S01E02.Source.Quality.Etc-Group")
         XCTAssertEqual(downpour.title, "Show Name-0")  // FIXME
         XCTAssertEqual(downpour.season, "01")
         XCTAssertEqual(downpour.episode, "02")
@@ -93,7 +104,7 @@ class DownpourTests: XCTestCase {
     }
 
     func testStandardShow10() {
-        let downpour = Downpour(string: "Show-Name-S06E01-720p")
+        let downpour = Downpour(name: "Show-Name-S06E01-720p")
         XCTAssertEqual(downpour.title, "Show-Name")  // FIXME
         XCTAssertEqual(downpour.season, "06")
         XCTAssertEqual(downpour.episode, "01")
@@ -102,7 +113,7 @@ class DownpourTests: XCTestCase {
     }
 
     func testFOVShow1() {
-        let downpour = Downpour(string: "Show_Name.1x02.Source_Quality_Etc-Group")
+        let downpour = Downpour(name: "Show_Name.1x02.Source_Quality_Etc-Group")
         XCTAssertEqual(downpour.title, "Show_Name")  // FIXME
         XCTAssertEqual(downpour.season, "1")
         XCTAssertEqual(downpour.episode, "02")
@@ -111,7 +122,7 @@ class DownpourTests: XCTestCase {
     }
 
     func testFOVShow2() {
-        let downpour = Downpour(string: "Show Name 1x02")
+        let downpour = Downpour(name: "Show Name 1x02")
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "1")
         XCTAssertEqual(downpour.episode, "02")
@@ -120,7 +131,7 @@ class DownpourTests: XCTestCase {
     }
 
     func testFOVShow3() {
-        let downpour = Downpour(string: "Show Name 1x02 x264 Test")
+        let downpour = Downpour(name: "Show Name 1x02 x264 Test")
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "1")
         XCTAssertEqual(downpour.episode, "02")
@@ -129,7 +140,7 @@ class DownpourTests: XCTestCase {
     }
 
     func testFOVShow4() {
-        let downpour = Downpour(string: "Show Name - 1x02 - My Ep Name")
+        let downpour = Downpour(name: "Show Name - 1x02 - My Ep Name")
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "1")
         XCTAssertEqual(downpour.episode, "02")
@@ -138,7 +149,7 @@ class DownpourTests: XCTestCase {
     }
 
     func testFOVShow5() {
-        let downpour = Downpour(string: "Show Name 1x02 x264 Test")
+        let downpour = Downpour(name: "Show Name 1x02 x264 Test")
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "1")
         XCTAssertEqual(downpour.episode, "02")
@@ -147,7 +158,7 @@ class DownpourTests: XCTestCase {
     }
 
     func testFOVShow6() {
-        let downpour = Downpour(string: "Show Name - 1x02 - My Ep Name")
+        let downpour = Downpour(name: "Show Name - 1x02 - My Ep Name")
         XCTAssertEqual(downpour.title, "Show Name")
         XCTAssertEqual(downpour.season, "1")
         XCTAssertEqual(downpour.episode, "02")
@@ -155,3 +166,28 @@ class DownpourTests: XCTestCase {
         XCTAssertNil(downpour.year)
     }
 }
+
+#if os(Linux)
+extension DownpourTests {
+    static var allTests: [(String, (DownpourTests) -> () throws -> Void)] {
+        return [
+            ("testStandardShow1", testStandardShow1),
+            ("testStandardShow2", testStandardShow2),
+            ("testStandardShow3", testStandardShow3),
+            ("testStandardShow4", testStandardShow4),
+            ("testStandardShow5", testStandardShow5),
+            ("testStandardShow6", testStandardShow6),
+            ("testStandardShow7", testStandardShow7),
+            ("testStandardShow8", testStandardShow8),
+            ("testStandardShow9", testStandardShow9),
+            ("testStandardShow10", testStandardShow10),
+            ("testFOVShow1", testFOVShow1),
+            ("testFOVShow2", testFOVShow2),
+            ("testFOVShow3", testFOVShow3),
+            ("testFOVShow4", testFOVShow4),
+            ("testFOVShow5", testFOVShow5),
+            ("testFOVShow6", testFOVShow6)
+        ]
+    }
+}
+#endif

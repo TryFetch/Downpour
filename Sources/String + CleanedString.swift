@@ -11,12 +11,18 @@ import Foundation
 extension String {
 
     var cleanedString: String {
-        get {
-            var cleaned = self
-            cleaned = cleaned.trimmingCharacters(in: CharacterSet(charactersIn: " -.([]{}))"))
-            cleaned = cleaned.replacingOccurrences(of: ".", with: " ")
-            return cleaned
-        }
+        var cleaned = self
+        cleaned = cleaned.trimmingCharacters(in: CharacterSet(charactersIn: " -.([]{}))"))
+        cleaned = cleaned.replacingOccurrences(of: ".", with: " ")
+        return cleaned
     }
+
+	subscript (r: CountableClosedRange<Int>) -> String {
+    	get {
+      		let startIndex =  self.index(self.startIndex, offsetBy: r.lowerBound)
+	  	    let endIndex = self.index(startIndex, offsetBy: r.upperBound - r.lowerBound)
+      		return self[startIndex...endIndex]
+    	}
+  	}
 
 }

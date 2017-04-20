@@ -31,11 +31,15 @@ xcuserdata
 timeline.xctimeline
 playground.xcworkspace
 
+## Vim swap files
+*.swp
+
 # Swift Package Manager
 #
 # Add this line if you want to avoid checking in source code from Swift Package Manager dependencies.
-# Packages/
+Packages/
 .build/
+Package.pins
 
 # CocoaPods
 #

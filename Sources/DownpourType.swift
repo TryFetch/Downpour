@@ -9,4 +9,6 @@
 public enum DownpourType {
     case tv
     case movie
+    case music
+    case unknown
 }
