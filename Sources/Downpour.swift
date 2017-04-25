@@ -25,8 +25,8 @@ open class Downpour: CustomStringConvertible {
     /// The patterns that will be used to fetch various pieces of information from the rawString.
     let patterns: [String: String] = [
         "pretty": "S\\d{1,2}[\\-\\.\\s_]?E\\d{1,2}",
-        "tricky": "[^\\d]\\d{1,2}[X\\-\\.\\s_]\\d{1,2}[^\\d]?",
-        "combined": "(?:S)?\\d{1,2}[EX\\-\\.\\s_]\\d{1,2}[^\\d]?",
+        "tricky": "[^\\d]\\d{1,2}[X\\-\\.\\s_]\\d{1,2}([^\\d]|$)",
+        "combined": "(?:S)?\\d{1,2}[EX\\-\\.\\s_]\\d{1,2}([^\\d]|$)",
         "altSeason": "Season \\d{1,2} Episode \\d{1,2}",
         "altSeasonSingle": "Season \\d{1,2}",
         "altEpisodeSingle": "Episode \\d{1,2}",

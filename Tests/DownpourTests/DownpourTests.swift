@@ -22,6 +22,24 @@ class DownpourTests: XCTestCase {
         super.tearDown()
     }
 
+    func testMovie1() {
+        let downpour = Downpour(name: "Movie.Name.2015.1080p.mp4")
+        XCTAssertEqual(downpour.title, "Movie Name")
+        XCTAssertEqual(downpour.year, "2015")
+        XCTAssertNil(downpour.season)
+        XCTAssertNil(downpour.episode)
+        XCTAssertEqual(downpour.type, .some(.movie))
+    }
+
+    func testMovie2() {
+        let downpour = Downpour(name: "Movie_Name_2_2017_x264_RARBG.avi")
+        XCTAssertEqual(downpour.title, "Movie_Name_2") // FIXME
+        XCTAssertEqual(downpour.year, "2017")
+        XCTAssertNil(downpour.season)
+        XCTAssertNil(downpour.episode)
+        XCTAssertEqual(downpour.type, .some(.movie))
+    }
+
     func testStandardShow1() {
         let downpour = Downpour(name: "Mr.Show.Name.S01E02.Source.Quality.Etc-Group")
         XCTAssertEqual(downpour.title, "Mr Show Name")
@@ -171,6 +189,8 @@ class DownpourTests: XCTestCase {
 extension DownpourTests {
     static var allTests: [(String, (DownpourTests) -> () throws -> Void)] {
         return [
+            ("testMovie1", testMovie1),
+            ("testMovie2", testMovie2),
             ("testStandardShow1", testStandardShow1),
             ("testStandardShow2", testStandardShow2),
             ("testStandardShow3", testStandardShow3),

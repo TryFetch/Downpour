@@ -12,7 +12,7 @@ extension String {
 
     var cleanedString: String {
         var cleaned = self
-        cleaned = cleaned.trimmingCharacters(in: CharacterSet(charactersIn: " -.([]{}))"))
+        cleaned = cleaned.trimmingCharacters(in: CharacterSet(charactersIn: " -.([]{}))_"))
         cleaned = cleaned.replacingOccurrences(of: ".", with: " ")
         return cleaned
     }
@@ -24,5 +24,4 @@ extension String {
       		return self[startIndex...endIndex]
     	}
   	}
-
 }
