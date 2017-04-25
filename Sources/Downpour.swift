@@ -71,7 +71,7 @@ open class Downpour: CustomStringConvertible {
                 return both[both.startIndex...both.startIndex].cleanedString
             }
 
-            let charset = CharacterSet(charactersIn: "eExX-. _")
+            let charset = CharacterSet(charactersIn: "eExX-._")
             let pieces = both.components(separatedBy: charset)
 
             let chars = pieces[0].characters
@@ -105,7 +105,7 @@ open class Downpour: CustomStringConvertible {
                 return both[startIndex...endIndex].cleanedString
             }
 
-            let charset = CharacterSet(charactersIn: "eExX-.")
+            let charset = CharacterSet(charactersIn: "eExX-._")
             let pieces = both.components(separatedBy: charset)
 
             return pieces[1].cleanedString
@@ -145,7 +145,7 @@ open class Downpour: CustomStringConvertible {
             // Test to see if the extension is a video file extension (treat subtitles like video files too)
             if self.videoExtensions.contains(ext) || self.subtitleExtensions.contains(ext) {
                 // If we got a season name from the title, then it's a TV show
-                if self.season != nil && Int(self.episode ?? "50") ?? 50 < 50 {
+                if self.season != nil && Int(self.episode ?? "64") ?? 64 < 64 {
                     return .tv
                 }
                 // Otherwise, it's a movie
