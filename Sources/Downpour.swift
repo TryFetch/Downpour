@@ -25,13 +25,13 @@ open class Downpour: CustomStringConvertible {
     /// The patterns that will be used to fetch various pieces of information from the rawString.
     let patterns: [String: String] = [
         "pretty": "S\\d{1,2}[\\-\\.\\s_]?E\\d{1,2}",
-        "tricky": "[^\\d]\\d{1,2}[X\\-\\.\\s_]\\d{1,2}[^\\d]?",
-        "combined": "(?:S)?)\\d{1,2}[EX\\-\\.\\s_]\\d{1,2}[^\\d]?",
+        "tricky": "[^\\d]\\d{1,2}[X\\-\\.\\s_]\\d{1,2}([^\\d]|$)",
+        "combined": "(?:S)?\\d{1,2}[EX\\-\\.\\s_]\\d{1,2}([^\\d]|$)",
         "altSeason": "Season \\d{1,2} Episode \\d{1,2}",
         "altSeasonSingle": "Season \\d{1,2}",
         "altEpisodeSingle": "Episode \\d{1,2}",
         "altSeason2": "[\\s_\\.\\-\\[]\\d{3}[\\s_\\.\\-\\]]",
-        "year": "[\\(?:\\.\\s_\\[](?:19|20)\\d{2}[\\]\\s_\\.\\)]"
+        "year": "[\\(?:\\.\\s_\\[](?:19|(?:[2-9])(?:[0-9]))\\d{2}[\\]\\s_\\.\\)]"
     ]
 
     /// Both the season and the episode together.
@@ -71,7 +71,7 @@ open class Downpour: CustomStringConvertible {
                 return both[both.startIndex...both.startIndex].cleanedString
             }
 
-            let charset = CharacterSet(charactersIn: "eExX-. _")
+            let charset = CharacterSet(charactersIn: "eExX-._ ")
             let pieces = both.components(separatedBy: charset)
 
             let chars = pieces[0].characters
@@ -105,10 +105,14 @@ open class Downpour: CustomStringConvertible {
                 return both[startIndex...endIndex].cleanedString
             }
 
-            let charset = CharacterSet(charactersIn: "eExX-.")
+            let charset = CharacterSet(charactersIn: "eExX-._ ")
             let pieces = both.components(separatedBy: charset)
+            var i = 1
+            while pieces[i].isEmpty && i < pieces.count {
+                i += 1
+            }
 
-            return pieces[1].cleanedString
+            return pieces[i].cleanedString
         }
         return nil
     }()
@@ -145,7 +149,7 @@ open class Downpour: CustomStringConvertible {
             // Test to see if the extension is a video file extension (treat subtitles like video files too)
             if self.videoExtensions.contains(ext) || self.subtitleExtensions.contains(ext) {
                 // If we got a season name from the title, then it's a TV show
-                if self.season != nil && Int(self.episode ?? "50") ?? 50 < 50 {
+                if self.season != nil && Int(self.episode ?? "64") ?? 64 < 64 {
                     return .tv
                 }
                 // Otherwise, it's a movie
