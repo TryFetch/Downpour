@@ -135,9 +135,9 @@ class Metadata {
     private func hasDependencies() throws {
         #if os(Linux)
         let (rc, _) = execute("which exiftool")
-        if rc != 0 {
+        guard rc == 0 else {
             throw MetadataError.missingDependency(dependency: "exiftool",
-                helpText: "On Ubuntu systems, try installing the 'libimage-exiftool-perl' package.")
+                helpText: "On Ubuntu systems, try installing the 'libimage-exiftool-perl' package by running `sudo apt-get install -y libimage-exiftool-perl`")
         }
         #endif
     }
