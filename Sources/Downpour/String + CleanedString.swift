@@ -8,8 +8,16 @@
 
 import Foundation
 
-extension String {
+extension Substring {
+    var cleanedString: String {
+        var cleaned = String(self)
+        cleaned = cleaned.trimmingCharacters(in: CharacterSet(charactersIn: " -.([]{}))_"))
+        cleaned = cleaned.replacingOccurrences(of: ".", with: " ")
+        return cleaned
+    }
+}
 
+extension String {
     var cleanedString: String {
         var cleaned = self
         cleaned = cleaned.trimmingCharacters(in: CharacterSet(charactersIn: " -.([]{}))_"))
@@ -17,7 +25,7 @@ extension String {
         return cleaned
     }
 
-	subscript (r: CountableClosedRange<Int>) -> String {
+	subscript (r: CountableClosedRange<Int>) -> Substring {
     	get {
       		let startIndex =  self.index(self.startIndex, offsetBy: r.lowerBound)
 	  	    let endIndex = self.index(startIndex, offsetBy: r.upperBound - r.lowerBound)

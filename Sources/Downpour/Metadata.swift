@@ -2,7 +2,6 @@ import Foundation
 import PathKit
 
 #if os(Linux)
-import JSON
 // On Linux we define our own metadata keys that correspond with what exiftool
 // uses for metadata key names
 private let AVMetadataCommonKeyTitle: String = "Title"
@@ -79,33 +78,51 @@ class Metadata {
 
     // The saved metadata items, so that we don't have to continually get the AVAsset or run exiftool
     #if os(Linux)
-    private struct Metadata: JSONInitializable {
-        private var data: [String: String]
-
-        init(_ str: String) throws {
-            try self.init(json: JSON(str))
+    private struct Metadata: Decodable {
+        enum MetadataKeys: String, CodingKey {
+            case title = "Title"
+            // case publisher = "Copyright"
+            case creationDate = "Date/Time Original"
+            case type = "File Type"
+            case format = "MIME Type"
+            case copyrights = "Copyright"
+            case albumName = "Album"
+            case artist = "Artist"
+            case artwork = "Picture"
         }
+        var title: String
+        // var publisher: String
+        var creationDate: String
+        var type: String
+        var format: String
+        var copyrights: String
+        var albumName: String
+        var artist: String
+        var artwork: String
 
-        init(json: JSON) throws {
-            data = [:]
-
-            // Required values. If there are errors here, throw
-            data[AVMetadataCommonKeyTitle] = try json.get(AVMetadataCommonKeyTitle)
-            data[AVMetadataCommonKeyFormat] = try json.get(AVMetadataCommonKeyFormat)
-
-            // Optional values, ignore errors and set to nil instead
-            data[AVMetadataCommonKeyPublisher] = try? json.get(AVMetadataCommonKeyPublisher)
-            data[AVMetadataCommonKeyCreationDate] = try? json.get(AVMetadataCommonKeyCreationDate)
-            data[AVMetadataCommonKeyType] = try? json.get(AVMetadataCommonKeyType)
-            data[AVMetadataCommonKeyCopyrights] = try? json.get(AVMetadataCommonKeyCopyrights)
-            data[AVMetadataCommonKeyAlbumName] = try? json.get(AVMetadataCommonKeyAlbumName)
-            data[AVMetadataCommonKeyArtist] = try? json.get(AVMetadataCommonKeyArtist)
-            data[AVMetadataCommonKeyArtwork] = try? json.get(AVMetadataCommonKeyArtwork)
-        }
-
-        public func get(_ key: String) -> String? {
-            guard data.keys.contains(key) else { return nil }
-            return data[key]
+        subscript(key: String) -> String {
+            switch key {
+        	case AVMetadataCommonKeyTitle:
+                return title
+            // case AVMetadataCommonKeyPublisher:
+            //    return publisher
+        	case AVMetadataCommonKeyCreationDate:
+                return creationDate
+        	case AVMetadataCommonKeyType:
+                return type
+        	case AVMetadataCommonKeyFormat:
+                return format
+        	case AVMetadataCommonKeyCopyrights:
+                return copyrights
+        	case AVMetadataCommonKeyAlbumName:
+                return albumName
+        	case AVMetadataCommonKeyArtist:
+                return artist
+        	case AVMetadataCommonKeyArtwork:
+                return artwork
+            default:
+                return ""
+            }
         }
     }
 
@@ -221,10 +238,11 @@ class Metadata {
             guard let stdout = output.stdout else {
                 throw MetadataError.couldNotGetMetadata(error: "File does not contain any metadata")
             }
-            metadataJSON = try Metadata(stdout)
+
+            metadataJSON = try JSONDecoder().decode(Metadata.self, from: stdout.data(using: .utf8)!)
         }
         // Try and retrieve the specified property
-        guard let property = metadataJSON?.get(key) else {
+        guard let property = metadataJSON?[key] else {
             // Throw an error if the key doesn't exist
             throw MetadataError.missingMetadataKey(key: key)
         }

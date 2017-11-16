@@ -23,9 +23,9 @@ class DownpourTests: XCTestCase {
     }
 
     func testMovie1() {
-        let downpour = Downpour(name: "Movie.Name.2015.1080p.mp4")
+        let downpour = Downpour(name: "Movie.Name.2013.1080p.BluRay.H264.AAC.mp4")
         XCTAssertEqual(downpour.title, "Movie Name")
-        XCTAssertEqual(downpour.year, "2015")
+        XCTAssertEqual(downpour.year, "2013")
         XCTAssertNil(downpour.season)
         XCTAssertNil(downpour.episode)
         XCTAssertEqual(downpour.type, .some(.movie))

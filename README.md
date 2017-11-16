@@ -28,10 +28,9 @@ if downpour.type == .TV {
 
 ## Installation
 
-Install manually by copying the contents of the `Sources` directory to your project or install via CocoaPods.
-
-```ruby
-pod 'Downpour'
+Add to your project using the Swift Package Manager by adding the following dependency to your Package.swift:
+```swift
+.package(url: "https://github.com/Ponyboy47/Downpour.git", .upToNextMinor(from: "0.5.0"))
 ```
 
-**Note:** For Swift 2.3 please use `0.1.0`
+For swift 3 use 0.4.x

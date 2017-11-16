@@ -36,22 +36,23 @@ open class Downpour: CustomStringConvertible {
 
     /// Both the season and the episode together.
     lazy open var seasonEpisode: String? = {
+        var matchedSubstring: Substring? = nil
         if let match = self.rawString.range(of: self.patterns["pretty"]!, options: [.regularExpression, .caseInsensitive]) {
-            return self.rawString[match]
+            matchedSubstring = self.rawString[match]
         } else if var match = self.rawString.range(of: self.patterns["tricky"]!, options: [.regularExpression, .caseInsensitive]) {
             match = self.rawString.index(after: match.lowerBound)..<match.upperBound
-            return self.rawString[match]
+            matchedSubstring = self.rawString[match]
         } else if var match = self.rawString.range(of: self.patterns["combined"]!, options: [.regularExpression, .caseInsensitive]) {
             match = match.lowerBound..<match.upperBound
-            return self.rawString[match]
+            matchedSubstring = self.rawString[match]
         } else if let match = self.rawString.range(of: self.patterns["altSeason"]!, options: [.regularExpression, .caseInsensitive]) {
-            return self.rawString[match]
+            matchedSubstring = self.rawString[match]
         } else if let match = self.rawString.range(of: self.patterns["altSeason2"]!, options: [.regularExpression, .caseInsensitive]) {
             let str = self.rawString[match].cleanedString
             guard ["264", "720"].contains(str[1...3]) else { return str }
         }
 
-        return nil
+        return matchedSubstring == nil ? nil : String(matchedSubstring!)
     }()
 
     /// The TV Season - e.g. 02
@@ -59,7 +60,7 @@ open class Downpour: CustomStringConvertible {
         if let both = self.seasonEpisode?.cleanedString {
             guard both.characters.count <= 7 else {
                 let match = self.rawString.range(of: self.patterns["altSeasonSingle"]!, options: [.regularExpression, .caseInsensitive])
-                let string = self.rawString[match!]
+                let string = String(self.rawString[match!])
 
                 let startIndex = string.startIndex
                 let endIndex = string.characters.index(string.startIndex, offsetBy: 6)
@@ -92,7 +93,7 @@ open class Downpour: CustomStringConvertible {
 
             guard chars.count <= 7 else {
                 let match = self.rawString.range(of: self.patterns["altEpisodeSingle"]!, options: [.regularExpression, .caseInsensitive])
-                let string = self.rawString[match!]
+                let string = String(self.rawString[match!])
 
                 let startIndex = string.startIndex
                 let endIndex = string.characters.index(string.startIndex, offsetBy: 6)
@@ -215,11 +216,11 @@ open class Downpour: CustomStringConvertible {
                     let endIndex = self.rawString.index(self.rawString.range(of: self.year!)!.lowerBound, offsetBy: -1)
                     string = self.rawString[self.rawString.startIndex...endIndex]
                 }
-                title = string
+                title = String(string)
             }
         } else if self.type == .movie && self.year != nil {
             let endIndex = self.rawString.index(self.rawString.range(of: self.year!)!.lowerBound, offsetBy: -1)
-            title = self.rawString[self.rawString.startIndex...endIndex]
+            title = String(self.rawString[self.rawString.startIndex...endIndex])
         } else if self.type == .music {
             title = self.metadata?.title
         }
@@ -230,8 +231,8 @@ open class Downpour: CustomStringConvertible {
             if let uncleanMatch = t.range(of: "\\d+\\.\\d+", options: .regularExpression),
                let tooCleanMatch = clean.range(of: "\\d+ \\d+", options: .regularExpression),
                uncleanMatch == tooCleanMatch {
-                let replacement = clean[tooCleanMatch].replacingOccurrences(of: " ", with: ".")
-                clean = clean.replacingOccurrences(of: clean[tooCleanMatch], with: replacement)
+                let replacement = String(clean[tooCleanMatch]).replacingOccurrences(of: " ", with: ".")
+                clean = clean.replacingOccurrences(of: String(clean[tooCleanMatch]), with: replacement)
             }
             return clean
         } else {

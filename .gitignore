@@ -40,6 +40,8 @@ playground.xcworkspace
 Packages/
 .build/
 Package.pins
+Package.resolved
+.AppleDouble
 
 # CocoaPods
 #
