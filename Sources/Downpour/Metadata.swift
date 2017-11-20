@@ -4,29 +4,16 @@ import PathKit
 #if os(Linux)
 // On Linux we define our own metadata keys that correspond with what exiftool
 // uses for metadata key names
-private let AVMetadataCommonKeyTitle: String = "Title"
-private let AVMetadataCommonKeyCreator: String = ""
-private let AVMetadataCommonKeySubject: String = ""
-private let AVMetadataCommonKeyDescription: String = ""
-private let AVMetadataCommonKeyPublisher: String = "Copyright"
-private let AVMetadataCommonKeyContributor: String = ""
-private let AVMetadataCommonKeyCreationDate: String = "Date/Time Original"
-private let AVMetadataCommonKeyLastModifiedDate: String = ""
-private let AVMetadataCommonKeyType: String = "File Type"
-private let AVMetadataCommonKeyFormat: String = "MIME Type"
-private let AVMetadataCommonKeyIdentifier: String = ""
-private let AVMetadataCommonKeySource: String = ""
-private let AVMetadataCommonKeyLanguage: String = ""
-private let AVMetadataCommonKeyRelation: String = ""
-private let AVMetadataCommonKeyLocation: String = ""
-private let AVMetadataCommonKeyCopyrights: String = "Copyright"
-private let AVMetadataCommonKeyAlbumName: String = "Album"
-private let AVMetadataCommonKeyAuthor: String = ""
-private let AVMetadataCommonKeyArtist: String = "Artist"
-private let AVMetadataCommonKeyArtwork: String = "Picture"
-private let AVMetadataCommonKeyMake: String = ""
-private let AVMetadataCommonKeyModel: String = ""
-private let AVMetadataCommonKeySoftware: String = ""
+    enum AVMetadataKey: String {
+        case commonKeyTitle = "Title"
+        case commonKeyCreationDate = "Date/Time Original"
+        case commonKeyType = "File Type"
+        case commonKeyFormat = "MIME Type"
+        case commonKeyCopyrights = "Copyright"
+        case commonKeyAlbumName = "Album"
+        case commonKeyArtist = "Artist"
+        case commonKeyArtwork = "Picture"
+    }
 #else
 // Mac OS/iOS includes the AVMetadataCommonKeys in the AVFoundation framework,
 // along with the AVAsset class to make retriving file metadata easy
@@ -37,37 +24,40 @@ class Metadata {
     // These lazy vars will get metadata for all the common keys normally
     // defined in AVFoundation. The vars are lazy, which means it will only
     // perform the getter once
-    lazy var title: String? = { return self.getCommonMetadata(AVMetadataCommonKeyTitle) }()
-    lazy var creator: String? = { return self.getCommonMetadata(AVMetadataCommonKeyCreator) }()
-    lazy var subject: String? = { return self.getCommonMetadata(AVMetadataCommonKeySubject) }()
-    lazy var description: String? = { return self.getCommonMetadata(AVMetadataCommonKeyDescription) }()
-    lazy var publisher: String? = { return self.getCommonMetadata(AVMetadataCommonKeyPublisher) }()
-    lazy var contributer: String? = { return self.getCommonMetadata(AVMetadataCommonKeyContributor) }()
+    lazy var title: String? = { return self[.commonKeyTitle] }()
     lazy var creationDate: Date? = {
         guard let dateString = self.creationDateString else { return nil }
         return self.dateFormatter.date(from: dateString)
     }()
-    lazy var creationDateString: String? = { return self.getCommonMetadata(AVMetadataCommonKeyCreationDate) }()
+    lazy var creationDateString: String? = { return self[.commonKeyCreationDate] }()
+    lazy var type: String? = { return self[.commonKeyType] }()
+    lazy var format: String? = { return self[.commonKeyFormat] }()
+    lazy var copyrights: String? = { return self[.commonKeyCopyrights] }()
+    lazy var album: String? = { return self[.commonKeyAlbumName] }()
+    lazy var artist: String? = { return self[.commonKeyArtist] }()
+    lazy var artwork: String? = { return self[.commonKeyArtwork] }()
+
+    #if !os(Linux)
+    lazy var publisher: String? = { return self[.commonKeyPublisher] }()
+    lazy var creator: String? = { return self[.commonKeyCreator] }()
+    lazy var subject: String? = { return self[.commonKeySubject] }()
+    lazy var description: String? = { return self[.commonKeyDescription] }()
+    lazy var contributer: String? = { return self[.commonKeyContributor] }()
     lazy var lastModifiedDate: Date? = {
         guard let dateString = self.lastModifiedDateString else { return nil }
         return self.dateFormatter.date(from: dateString)
     }()
-    lazy var lastModifiedDateString: String? = { return self.getCommonMetadata(AVMetadataCommonKeyLastModifiedDate) }()
-    lazy var type: String? = { return self.getCommonMetadata(AVMetadataCommonKeyType) }()
-    lazy var format: String? = { return self.getCommonMetadata(AVMetadataCommonKeyFormat) }()
-    lazy var identifier: String? = { return self.getCommonMetadata(AVMetadataCommonKeyIdentifier) }()
-    lazy var source: String? = { return self.getCommonMetadata(AVMetadataCommonKeySource) }()
-    lazy var language: String? = { return self.getCommonMetadata(AVMetadataCommonKeyLanguage) }()
-    lazy var relation: String? = { return self.getCommonMetadata(AVMetadataCommonKeyRelation) }()
-    lazy var location: String? = { return self.getCommonMetadata(AVMetadataCommonKeyLocation) }()
-    lazy var copyrights: String? = { return self.getCommonMetadata(AVMetadataCommonKeyCopyrights) }()
-    lazy var album: String? = { return self.getCommonMetadata(AVMetadataCommonKeyAlbumName) }()
-    lazy var author: String? = { return self.getCommonMetadata(AVMetadataCommonKeyAuthor) }()
-    lazy var artist: String? = { return self.getCommonMetadata(AVMetadataCommonKeyArtist) }()
-    lazy var artwork: String? = { return self.getCommonMetadata(AVMetadataCommonKeyArtwork) }()
-    lazy var make: String? = { return self.getCommonMetadata(AVMetadataCommonKeyMake) }()
-    lazy var model: String? = { return self.getCommonMetadata(AVMetadataCommonKeyModel) }()
-    lazy var software: String? = { return self.getCommonMetadata(AVMetadataCommonKeySoftware) }()
+    lazy var lastModifiedDateString: String? = { return self[.commonKeyLastModifiedDate] }()
+    lazy var identifier: String? = { return self[.commonKeyIdentifier] }()
+    lazy var source: String? = { return self[.commonKeySource] }()
+    lazy var language: String? = { return self[.commonKeyLanguage] }()
+    lazy var relation: String? = { return self[.commonKeyRelation] }()
+    lazy var location: String? = { return self[.commonKeyLocation] }()
+    lazy var author: String? = { return self[.commonKeyAuthor] }()
+    lazy var make: String? = { return self[.commonKeyMake] }()
+    lazy var model: String? = { return self[.commonKeyModel] }()
+    lazy var software: String? = { return self[.commonKeySoftware] }()
+    #endif
 
     /// A DateFormatter for the attributes that require a date from string in the ISO 8601 format
     lazy var dateFormatter: DateFormatter = {
@@ -81,7 +71,6 @@ class Metadata {
     private struct Metadata: Decodable {
         enum MetadataKeys: String, CodingKey {
             case title = "Title"
-            // case publisher = "Copyright"
             case creationDate = "Date/Time Original"
             case type = "File Type"
             case format = "MIME Type"
@@ -91,7 +80,6 @@ class Metadata {
             case artwork = "Picture"
         }
         var title: String
-        // var publisher: String
         var creationDate: String
         var type: String
         var format: String
@@ -100,25 +88,23 @@ class Metadata {
         var artist: String
         var artwork: String
 
-        subscript(key: String) -> String {
+        subscript(key: AVMetadataKey) -> String {
             switch key {
-        	case AVMetadataCommonKeyTitle:
+        	case .commonKeyTitle:
                 return title
-            // case AVMetadataCommonKeyPublisher:
-            //    return publisher
-        	case AVMetadataCommonKeyCreationDate:
+        	case .commonKeyCreationDate:
                 return creationDate
-        	case AVMetadataCommonKeyType:
+        	case .commonKeyType:
                 return type
-        	case AVMetadataCommonKeyFormat:
+        	case .commonKeyFormat:
                 return format
-        	case AVMetadataCommonKeyCopyrights:
+        	case .commonKeyCopyrights:
                 return copyrights
-        	case AVMetadataCommonKeyAlbumName:
+        	case .commonKeyAlbumName:
                 return albumName
-        	case AVMetadataCommonKeyArtist:
+        	case .commonKeyArtist:
                 return artist
-        	case AVMetadataCommonKeyArtwork:
+        	case .commonKeyArtwork:
                 return artwork
             default:
                 return ""
@@ -203,7 +189,7 @@ class Metadata {
 
      - Returns: The string value of the common metadata, or nil. If an error occured, this will print it out
     */
-    public func getCommonMetadata(_ key: String) -> String? {
+    public subscript(_ key: AVMetadataKey) -> String? {
         do {
             // Try and return the Common Metadata value
             return try getCM(key)
@@ -221,7 +207,7 @@ class Metadata {
 
      - Returns: The string value of the common metadata, or nil.
     */
-    private func getCM(_ key: String) throws -> String? {
+    private func getCM(_ key: AVMetadataKey) throws -> String? {
         #if os(Linux)
         // If we're running Linux, check to see if we've saved an exiftool metadata JSON object
         if metadataJSON == nil {
@@ -244,7 +230,7 @@ class Metadata {
         // Try and retrieve the specified property
         guard let property = metadataJSON?[key] else {
             // Throw an error if the key doesn't exist
-            throw MetadataError.missingMetadataKey(key: key)
+            throw MetadataError.missingMetadataKey(key: key.rawValue)
         }
         // Otherwise, return the property
         return property
@@ -265,10 +251,11 @@ class Metadata {
         let metadata = AVMetadataItem.metadataItems(from: metadataItems!, withKey: key, keySpace: nil)
         // Throws an error if there is no common metadata for the key
         guard metadata.count > 0 else {
-            throw MetadataError.missingMetadataKey(key: key)
+            throw MetadataError.missingMetadataKey(key: key.rawValue)
         }
         // Return the first metadata item's string value
         return metadata.first?.stringValue
         #endif
     }
 }
+
