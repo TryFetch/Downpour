@@ -9,7 +9,6 @@
 import XCTest
 @testable import Downpour
 
-
 class DownpourTests: XCTestCase {
 
 	override func setUp() {
@@ -130,6 +129,22 @@ class DownpourTests: XCTestCase {
         XCTAssertNil(downpour.year)
     }
 
+    func testStandardShow11() {
+        let downpour = Downpour(name: "Show Name - s2005e01")
+        XCTAssertEqual(downpour.title, "Show Name")
+        XCTAssertEqual(downpour.season, "2005")
+        XCTAssertEqual(downpour.episode, "01")
+        XCTAssertEqual(downpour.type, .some(.tv))
+    }
+
+    func testStandardShow12() {
+        let downpour = Downpour(name: "Show Name - s05e01")
+        XCTAssertEqual(downpour.title, "Show Name")
+        XCTAssertEqual(downpour.season, "05")
+        XCTAssertEqual(downpour.episode, "01")
+        XCTAssertEqual(downpour.type, .some(.tv))
+    }
+
     func testFOVShow1() {
         let downpour = Downpour(name: "Show_Name.1x02.Source_Quality_Etc-Group")
         XCTAssertEqual(downpour.title, "Show_Name")  // FIXME
@@ -201,6 +216,8 @@ extension DownpourTests {
             ("testStandardShow8", testStandardShow8),
             ("testStandardShow9", testStandardShow9),
             ("testStandardShow10", testStandardShow10),
+            ("testStandardShow11", testStandardShow11),
+            ("testStandardShow12", testStandardShow12),
             ("testFOVShow1", testFOVShow1),
             ("testFOVShow2", testFOVShow2),
             ("testFOVShow3", testFOVShow3),

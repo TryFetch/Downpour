@@ -25,6 +25,10 @@ extension String {
         return cleaned
     }
 
+    func range(of pattern: Downpour.Pattern, options: String.CompareOptions = []) -> Range<String.Index>? {
+        return self.range(of: pattern.rawValue, options: options)
+    }
+
 	subscript (r: CountableClosedRange<Int>) -> Substring {
     	get {
       		let startIndex =  self.index(self.startIndex, offsetBy: r.lowerBound)

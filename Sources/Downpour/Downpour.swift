@@ -23,31 +23,33 @@ open class Downpour: CustomStringConvertible {
     }()
 
     /// The patterns that will be used to fetch various pieces of information from the rawString.
-    let patterns: [String: String] = [
-        "pretty": "S\\d{1,2}[\\-\\.\\s_]?E\\d{1,2}",
-        "tricky": "[^\\d]\\d{1,2}[X\\-\\.\\s_]\\d{1,2}([^\\d]|$)",
-        "combined": "(?:S)?\\d{1,2}[EX\\-\\.\\s_]\\d{1,2}([^\\d]|$)",
-        "altSeason": "Season \\d{1,2} Episode \\d{1,2}",
-        "altSeasonSingle": "Season \\d{1,2}",
-        "altEpisodeSingle": "Episode \\d{1,2}",
-        "altSeason2": "[\\s_\\.\\-\\[]\\d{3}[\\s_\\.\\-\\]]",
-        "year": "[\\(?:\\.\\s_\\[](?:19|(?:[2-9])(?:[0-9]))\\d{2}[\\]\\s_\\.\\)]"
-    ]
+    enum Pattern: String {
+        case pretty = "S(\\d{4}|\\d{1,2})[\\-\\.\\s_]?E\\d{1,2}"
+        case tricky = "[^\\d](\\d{4}|\\d{1,2})[X\\-\\.\\s_]\\d{1,2}([^\\d]|$)"
+        case combined = "(?:S)?(\\d{4}|\\d{1,2})[EX\\-\\.\\s_]\\d{1,2}([^\\d]|$)"
+        case altSeason = "Season (\\d{4}|\\d{1,2}) Episode \\d{1,2}"
+        case altSeasonSingle = "Season (\\d{4}|\\d{1,2})"
+        case altEpisodeSingle = "Episode \\d{1,2}"
+        case altSeason2 = "[\\s_\\.\\-\\[]\\d{3}[\\s_\\.\\-\\]]"
+        case year = "[\\(?:\\.\\s_\\[](?:19|(?:[2-9])(?:[0-9]))\\d{2}[\\]\\s_\\.\\)]"
+    }
+
+    static let regexOptions: String.CompareOptions = [.regularExpression, .caseInsensitive]
 
     /// Both the season and the episode together.
     lazy open var seasonEpisode: String? = {
         var matchedSubstring: Substring? = nil
-        if let match = self.rawString.range(of: self.patterns["pretty"]!, options: [.regularExpression, .caseInsensitive]) {
+        if let match = self.rawString.range(of: Pattern.pretty, options: Downpour.regexOptions) {
             matchedSubstring = self.rawString[match]
-        } else if var match = self.rawString.range(of: self.patterns["tricky"]!, options: [.regularExpression, .caseInsensitive]) {
+        } else if var match = self.rawString.range(of: Pattern.tricky, options: Downpour.regexOptions) {
             match = self.rawString.index(after: match.lowerBound)..<match.upperBound
             matchedSubstring = self.rawString[match]
-        } else if var match = self.rawString.range(of: self.patterns["combined"]!, options: [.regularExpression, .caseInsensitive]) {
+        } else if var match = self.rawString.range(of: Pattern.combined, options: Downpour.regexOptions) {
             match = match.lowerBound..<match.upperBound
             matchedSubstring = self.rawString[match]
-        } else if let match = self.rawString.range(of: self.patterns["altSeason"]!, options: [.regularExpression, .caseInsensitive]) {
+        } else if let match = self.rawString.range(of: Pattern.altSeason, options: Downpour.regexOptions) {
             matchedSubstring = self.rawString[match]
-        } else if let match = self.rawString.range(of: self.patterns["altSeason2"]!, options: [.regularExpression, .caseInsensitive]) {
+        } else if let match = self.rawString.range(of: Pattern.altSeason2, options: Downpour.regexOptions) {
             let str = self.rawString[match].cleanedString
             guard ["264", "720"].contains(str[1...3]) else { return str }
         }
@@ -58,8 +60,8 @@ open class Downpour: CustomStringConvertible {
     /// The TV Season - e.g. 02
     lazy open var season: String? = {
         if let both = self.seasonEpisode?.cleanedString {
-            guard both.count <= 7 else {
-                let match = self.rawString.range(of: self.patterns["altSeasonSingle"]!, options: [.regularExpression, .caseInsensitive])
+            guard both.range(of: "Season ", options: Downpour.regexOptions) == nil else {
+                let match = self.rawString.range(of: Pattern.altSeasonSingle, options: Downpour.regexOptions)
                 let string = String(self.rawString[match!])
 
                 let startIndex = string.startIndex
@@ -88,8 +90,8 @@ open class Downpour: CustomStringConvertible {
     /// The TV Episode - e.g. 22
     lazy open var episode: String? = {
         if let both = self.seasonEpisode?.cleanedString {
-            guard both.count <= 7 else {
-                let match = self.rawString.range(of: self.patterns["altEpisodeSingle"]!, options: [.regularExpression, .caseInsensitive])
+            guard both.range(of: "Season ", options: Downpour.regexOptions) == nil else {
+                let match = self.rawString.range(of: Pattern.altEpisodeSingle, options: Downpour.regexOptions)
                 let string = String(self.rawString[match!])
 
                 let startIndex = string.startIndex
@@ -175,7 +177,7 @@ open class Downpour: CustomStringConvertible {
                 // I don't know what the format value is for AVAssets, so just print it for now
                 print(format)
                 #endif
-    
+
                 // Returns unkown if the format is neither video nor audio
                 return .unknown
             }
@@ -190,7 +192,7 @@ open class Downpour: CustomStringConvertible {
     /// Year of release
     lazy open var year: String? = {
         if [.movie, .tv].contains(self.type) {
-            if let match = self.rawString.range(of: self.patterns["year"]!, options: [.regularExpression, .caseInsensitive]) {
+            if let match = self.rawString.range(of: Pattern.year, options: Downpour.regexOptions) {
                 let found = self.rawString[match]
                 return found.cleanedString
             }
@@ -206,8 +208,8 @@ open class Downpour: CustomStringConvertible {
         var title: String?
         if self.type == .tv {
             // Check if there is actually a title before the episode string
-            if let se = self.rawString.range(of: self.seasonEpisode!), se.lowerBound != self.rawString.startIndex {
-                let endIndex = self.rawString.index(se.lowerBound, offsetBy: -1)
+            if let sEp = self.rawString.range(of: self.seasonEpisode!), sEp.lowerBound != self.rawString.startIndex {
+                let endIndex = self.rawString.index(sEp.lowerBound, offsetBy: -1)
                 var string = self.rawString[self.rawString.startIndex...endIndex]
                 if self.year != nil {
                     let endIndex = self.rawString.index(self.rawString.range(of: self.year!)!.lowerBound, offsetBy: -1)
