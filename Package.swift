@@ -8,7 +8,7 @@ let package = Package(
       .library(name: "Downpour", targets: ["Downpour"])
   ],
   dependencies: [
-      .package(url: "https://github.com/Ponyboy47/PathKit.git", .upToNextMinor(from: "0.9.0"))
+      .package(url: "https://github.com/Ponyboy47/PathKit.git", .upToNextMinor(from: "0.10.0"))
   ],
   targets: [
       .target(

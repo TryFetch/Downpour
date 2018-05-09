@@ -31,8 +31,9 @@ xcuserdata
 timeline.xctimeline
 playground.xcworkspace
 
-## Vim swap files
-*.swp
+## Vim swap and session files
+*.sw[po]
+*.vimsession
 
 # Swift Package Manager
 #
