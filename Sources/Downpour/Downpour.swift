@@ -7,15 +7,15 @@
 //
 
 import Foundation
-import PathKit
+import TrailBlazer
 
-open class Downpour: CustomStringConvertible {
+open class Downpour: CustomStringConvertible, Downpourable {
 
     /// The raw string that has not yet been parsed by Downpour.
-    var rawString: String
+    private var rawString: String
 
     /// The full path to the file
-    var fullPath: Path
+    private var fullPath: Path
 
     /// The metadata for the file (generally only useful for music files)
     lazy var metadata: Metadata? = {
@@ -34,7 +34,7 @@ open class Downpour: CustomStringConvertible {
         case year = "[\\(?:\\.\\s_\\[](?:19|(?:[2-9])(?:[0-9]))\\d{2}[\\]\\s_\\.\\)]"
     }
 
-    static let regexOptions: String.CompareOptions = [.regularExpression, .caseInsensitive]
+    public static var regexOptions: String.CompareOptions = [.regularExpression, .caseInsensitive]
 
     /// Both the season and the episode together.
     lazy open var seasonEpisode: String? = {
@@ -281,18 +281,11 @@ open class Downpour: CustomStringConvertible {
 
     // MARK: - Initializers
 
-    public init(name: String, path: Path? = nil) {
-        rawString = name
-        if let p = path {
-            fullPath = p.isFile ? p : p + name
-        } else {
-            fullPath = Path(name)
-        }
+    public init(filename: String) {
+        rawString = filename
     }
 
-    public init(fullPath: Path) {
-        self.fullPath = fullPath
-        self.rawString = fullPath.lastComponent
+    public init(path: FilePath) {
+        rawString = path.lastComponent ?? path.string
     }
-
 }

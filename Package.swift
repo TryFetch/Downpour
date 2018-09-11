@@ -8,12 +8,13 @@ let package = Package(
       .library(name: "Downpour", targets: ["Downpour"])
   ],
   dependencies: [
-      .package(url: "https://github.com/Ponyboy47/PathKit.git", .upToNextMinor(from: "0.10.0"))
+      .package(url: "https://github.com/Ponyboy47/TrailBlazer.git", from: "0.11.0"),
+      .package(url: "https://github.com/kareman/SwiftShell.git", from: "4.1.0")
   ],
   targets: [
       .target(
           name: "Downpour",
-          dependencies: ["PathKit"],
+          dependencies: ["TrailBlazer", "SwiftShell"],
           path: "Sources"
           ),
       .testTarget(

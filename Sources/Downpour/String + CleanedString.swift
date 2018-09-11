@@ -25,7 +25,7 @@ extension String {
         return cleaned
     }
 
-    func range(of pattern: Downpour.Pattern, options: String.CompareOptions = []) -> Range<String.Index>? {
+    func range<Enum: RawRepresentable>(of pattern: Enum, options: String.CompareOptions = []) -> Range<String.Index>? where Enum.RawValue == String {
         return self.range(of: pattern.rawValue, options: options)
     }
 
