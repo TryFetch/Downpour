@@ -20,13 +20,19 @@ public struct MetadataFormat: RawRepresentable, ExpressibleByIntegerLiteral, Has
 
         public init(rawValue: UInt8) { self.rawValue = rawValue }
         public init(integerLiteral value: UInt8) { self.init(rawValue: value) }
+
+        public func contains(_ element: VideoFormat) -> Bool {
+            return VideoFormat(rawValue: rawValue & element.rawValue) == element
+        }
     }
 
     public let rawValue: UInt8
-    var format: VideoFormat { return VideoFormat(rawValue: rawValue >> 4) }
+
+    private var noFormat: MetadataFormat { return MetadataFormat(rawValue: rawValue & 0b0000_1111) }
+    public var format: VideoFormat { return VideoFormat(rawValue: rawValue >> 4) }
 
     public var description: String {
-        switch self {
+        switch noFormat {
         case .video: return "video(\(format))"
         case .subtitle: return "subtitle(\(format))"
         case .audio: return "audio"
@@ -44,7 +50,7 @@ public struct MetadataFormat: RawRepresentable, ExpressibleByIntegerLiteral, Has
         return MetadataFormat(rawValue: MetadataFormat.video.rawValue | (format.rawValue << 4))
     }
 
-    public static let subtitle: MetadataFormat = 0b0000_0011
+    public static let subtitle: MetadataFormat = 0b0000_0010
     public static func subtitle(format: VideoFormat) -> MetadataFormat {
         return MetadataFormat(rawValue: MetadataFormat.subtitle.rawValue | (format.rawValue << 4))
     }
@@ -57,5 +63,15 @@ public struct MetadataFormat: RawRepresentable, ExpressibleByIntegerLiteral, Has
 
     public init(rawValue: UInt8) { self.rawValue = rawValue }
     public init(integerLiteral value: UInt8) { self.init(rawValue: value) }
-}
 
+    public static func == (lhs: MetadataFormat, rhs: MetadataFormat) -> Bool {
+        guard lhs.noFormat.rawValue == rhs.noFormat.rawValue else {
+            return lhs.rawValue == rhs.rawValue
+        }
+        return [lhs.format, rhs.format].contains(.unknown) ? true : lhs.format == rhs.format
+    }
+
+    public func contains(_ element: MetadataFormat) -> Bool {
+        return MetadataFormat(rawValue: rawValue & element.rawValue) == element
+    }
+}

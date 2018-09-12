@@ -77,11 +77,12 @@ open class VideoMetadata: Metadata, CustomStringConvertible {
         }
     }
 
-    open lazy var type: MetadataFormat = {
-        guard let ext = _extension else {
-            return .video
-        }
+    public init(name: String) {
+        _rawString = name
+        _extension = nil
+    }
 
+    open lazy var type: MetadataFormat = {
         // Sometimes it mestakes the x/h 264 as season 2, episode 64. I don't
         // know of any shows that have 64 episode in a single season, so
         // checking that the episode < 64 should be safe and will resolve these
@@ -97,7 +98,7 @@ open class VideoMetadata: Metadata, CustomStringConvertible {
     private lazy var seasonEpisode: String? = {
         var _match: Range<String.Index>?
         var _patternMatched: Pattern?
-        for (index, pattern) in Pattern.allCases.enumerated() {
+        for (index, pattern) in Pattern.allCases.filter({ return $0 != .year}).enumerated() {
             if let __match = _rawString.range(of: pattern, options: VideoMetadata.regexOptions) {
                 _match = __match
                 _patternMatched = Pattern.allCases[index]
@@ -237,8 +238,17 @@ open class VideoMetadata: Metadata, CustomStringConvertible {
     }()
 }
 
-extension Downpour where MetadataType: VideoMetadata {
+extension Downpour where MetadataType == VideoMetadata {
     public var season: Int? { return metadata.season }
     public var episode: Int? { return metadata.episode }
     public var year: Int? { return metadata.year }
+
+    public convenience init?(filename: String) {
+        guard let _md = VideoMetadata(filename: filename) else { return nil }
+        self.init(metadata: _md)
+    }
+  
+    public convenience init(name: String) {
+        self.init(metadata: VideoMetadata(name: name))
+    }
 }
