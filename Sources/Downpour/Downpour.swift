@@ -25,4 +25,9 @@ open class Downpour<_MetadataType: Metadata>: CustomStringConvertible, Downpoura
     public required init(metadata: MetadataType) {
         self.metadata = metadata
     }
+
+    public required convenience init?(file path: FilePath) {
+        guard let _md = MetadataType(file: path) else { return nil }
+        self.init(metadata: _md)
+    }
 }

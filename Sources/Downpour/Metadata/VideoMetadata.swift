@@ -237,7 +237,7 @@ open class VideoMetadata: Metadata, CustomStringConvertible {
     }()
 }
 
-public extension Downpour where MetadataType: VideoMetadata {
+extension Downpour where MetadataType: VideoMetadata {
     public var season: Int? { return metadata.season }
     public var episode: Int? { return metadata.episode }
     public var year: Int? { return metadata.year }

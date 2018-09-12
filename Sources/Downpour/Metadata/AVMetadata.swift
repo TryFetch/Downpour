@@ -52,7 +52,7 @@ public class AVMetadata: Metadata {
     }
 }
 
-public extension Downpour where MetadataType: AVMetadata {
+extension Downpour where MetadataType: AVMetadata {
     public var title: String { return metadata.title }
     public var type: MetadataFormat { return metadata.type }
     public var creationDate: Date? { return metadata.creationDate }

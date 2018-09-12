@@ -85,7 +85,7 @@ public struct ExifToolMetadata: Metadata, Decodable {
     }
 }
 
-public extension Downpour where MetadataType == ExifToolMetadata {
+extension Downpour where MetadataType == ExifToolMetadata {
         public var creation: Date? { return metadata.creation }
         public var filetype: String? { return metadata.filetype }
         public var copyrights: [String]? { return metadata.copyrights }
