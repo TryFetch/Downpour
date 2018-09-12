@@ -1,11 +1,13 @@
 #if !os(Linux)
+public typealias AudioMetadata = AVMetadata
+
 import Foundation
 import AVFoundation
 import TrailBlazer
 
 public class AVMetadata: Metadata {
     public lazy var title: String = { return self[.commonKeyTitle] ?? path.string }()
-    public let type: MetadataType = .audio
+    public let type: MetadataFormat = .audio
     public lazy var creationDate: Date? = {
         guard let dateString = self.creationDateString else { return nil }
         return self.dateFormatter.date(from: dateString)
@@ -48,5 +50,23 @@ public class AVMetadata: Metadata {
     public subscript(_ key: AVMetadataKey) -> String? {
         return AVMetadataItem.metadataItems(from: metadata, withKey: key, keySpace: nil).first?.stringValue
     }
+}
+
+public extension Downpour where MetadataType: AVMetadata {
+    public var title: String { return metadata.title }
+    public var type: MetadataFormat { return metadata.type }
+    public var creationDate: Date? { return metadata.creationDate }
+    public var format: String? { return metadata.format }
+    public var copyrights: String? { return metadata.copyrights }
+    public var album: String? { return metadata.album }
+    public var artist: String? { return metadata.artist }
+    public var artwork: String? { return metadata.artwork }
+    public var publisher: String? { return metadata.publisher }
+    public var creator: String? { return metadata.creator }
+    public var subject: String? { return metadata.subject }
+    public var summary: String? { return metadata.summary }
+    public var lastModifiedDate: Date? { return metadata.lastModifiedData }
+    public var language: String? { return metadata.language }
+    public var author: String? { return metadata.author }
 }
 #endif

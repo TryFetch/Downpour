@@ -12,32 +12,32 @@ open class VideoMetadata: Metadata, CustomStringConvertible {
         case altSeason2 = "[\\s_\\.\\-\\[]\\d{3}[\\s_\\.\\-\\]]"
         case year = "[\\(?:\\.\\s_\\[](?:19|(?:[2-9])(?:[0-9]))\\d{2}[\\]\\s_\\.\\)]"
     }
-    open static let regexOptions: String.CompareOptions = [.regularExpression, .caseInsensitive]
+    public static let regexOptions: String.CompareOptions = [.regularExpression, .caseInsensitive]
 
-    open static let extensions: [String] = [
-                                            "mkv", "flv", "vob", "ogv", "drc",
-                                            "gifv", "mng", "avi", "mov", "qt",
-                                            "wmv", "yuv", "rmvb", "asf", "amv",
-                                            "mp4", "m4p", "m4v", "mpg", "mp2",
-                                            "mpeg", "mpe", "mpv", "svi", "3g2",
-                                            "mx4", "roq", "nsv", "f4v", "f4p",
-                                            "f4a", "f4b"
-                                           ]
+    public static let extensions: [MetadataFormat: [String]] = [
+        .video: [
+                 "mkv", "flv", "vob", "ogv", "drc",
+                 "gifv", "mng", "avi", "mov", "qt",
+                 "wmv", "yuv", "rmvb", "asf", "amv",
+                 "mp4", "m4p", "m4v", "mpg", "mp2",
+                 "mpeg", "mpe", "mpv", "svi", "3g2",
+                 "mx4", "roq", "nsv", "f4v", "f4p",
+                 "f4a", "f4b"
+                ],
+        .subtitle: ["srt", "smi", "ssa", "ass", "vtt"]
+    ]
 
-    open static let splitCharset = CharacterSet(charactersIn: "eExX-._ ")
+    public static let splitCharset = CharacterSet(charactersIn: "eExX-._ ")
 
-    private let __rawString: String
-    private let __extension: String?
-
-    open var _rawString: String { return __rawString }
-    open var _extension: String? { return __extension }
+    private let _rawString: String
+    private let _extension: String?
 
     open var description: String {
         var desc: String = "\(Swift.type(of: self))(title: \(title)"
 
         switch type {
-        case .video(let videoType):
-            switch videoType {
+        case .video, .subtitle:
+            switch type.format {
             case .tv:
                 desc += ", season: \(String(describing: season)), episode: \(String(describing: episode))"
             default: break
@@ -53,28 +53,28 @@ open class VideoMetadata: Metadata, CustomStringConvertible {
     }
 
     public required init?(file path: FilePath) {
-        guard VideoMetadata.extensions.contains(path.extension ?? "") else { return nil }
+        guard VideoMetadata.extensions.reduce([], { $0 + $1.value }).contains(path.extension ?? "") else { return nil }
         guard let last = path.lastComponentWithoutExtension else { return nil }
-        __rawString = last
-        __extension = path.extension
+        _rawString = last
+        _extension = path.extension
     }
 
     public init?(filename: String) {
         let comps = filename.components(separatedBy: ".")
         if comps.count > 1 {
-            __extension = comps.last
-            guard VideoMetadata.extensions.contains(__extension ?? "") else { return nil }
+            _extension = comps.last
+            guard VideoMetadata.extensions.reduce([], { $0 + $1.value }).contains(_extension ?? "") else { return nil }
 
-            __rawString = comps.dropLast().joined(separator: ".")
+            _rawString = comps.dropLast().joined(separator: ".")
         } else {
-            __rawString = filename
-            __extension = nil
+            _rawString = filename
+            _extension = nil
         }
     }
 
-    open lazy var type: MetadataType = {
+    open lazy var type: MetadataFormat = {
         guard let ext = _extension else {
-            return .video(.unknown)
+            return .video
         }
 
         // Sometimes it mestakes the x/h 264 as season 2, episode 64. I don't
@@ -194,8 +194,8 @@ open class VideoMetadata: Metadata, CustomStringConvertible {
         let _title: String?
 
         switch type {
-        case .video(let videoType):
-            switch videoType {
+        case .video, .subtitle:
+            switch type.format {
             case .movie:
                 if let year = self.year {
                     let endIndex = _rawString.index(before: _rawString.range(of: String(year))!.lowerBound)
@@ -230,4 +230,10 @@ open class VideoMetadata: Metadata, CustomStringConvertible {
 
         return _rawString.cleanedString
     }()
+}
+
+public extension Downpour where MetadataType: VideoMetadata {
+    public var season: Int? { return metadata.season }
+    public var episode: Int? { return metadata.episode }
+    public var year: Int? { return metadata.year }
 }

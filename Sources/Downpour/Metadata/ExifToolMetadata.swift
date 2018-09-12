@@ -1,13 +1,15 @@
 #if os(Linux)
+public typealias AudioMetadata = ExifToolMetadata
+
 import SwiftShell
 import TrailBlazer
 import Foundation
 
-public struct ExifTool: Metadata, Decodable {
+public struct ExifToolMetadata: Metadata, Decodable {
     public let title: String
     public let creation: Date?
     public let filetype: String?
-    public let type: MetadataType
+    public let type: MetadataFormat
     public let copyrights: [String]?
     public let albumName: String?
     public let artist: String?
@@ -43,7 +45,7 @@ public struct ExifTool: Metadata, Decodable {
         let output = SwiftShell.run("exiftool", "-b", "-All", "-j", path.string).stdout
 
         guard let exifData = output.data(using: .utf8) else { return nil }
-        guard let data = try? JSONDecoder().decode(ExifTool.self, from: exifData) else { return nil }
+        guard let data = try? JSONDecoder().decode(ExifToolMetadata.self, from: exifData) else { return nil }
 
         title = data.title.isEmpty ? path.lastComponentWithoutExtension ?? path.string : data.title
         creation = data.creation
@@ -60,26 +62,35 @@ public struct ExifTool: Metadata, Decodable {
 
         title = try container.decodeIfPresent(String.self, forKey: .title) ?? ""
         if let creationString = try container.decodeIfPresent(String.self, forKey: .creationDate) {
-            creation = ExifTool._dateFormatter.date(from: creationString)
+            creation = ExifToolMetadata._dateFormatter.date(from: creationString)
         } else {
             creation = nil
         }
         filetype = try container.decodeIfPresent(String.self, forKey: .type)
         if let typeComponents = try container.decodeIfPresent(String.self, forKey: .format)?.lowercased().components(separatedBy: "/") {
             if typeComponents.contains("video") {
-                type = .video(.unknown)
+                throw MetadataError.incorrectFormat(found: .video, expected: .audio)
             } else if typeComponents.contains("audio") {
                 type = .audio
             } else {
-                type = .unknown
+                throw MetadataError.incorrectFormat(found: .unknown, expected: .audio)
             }
         } else {
-            type = .unknown
+            throw MetadataError.incorrectFormat(found: .unknown, expected: .audio)
         }
         copyrights = try container.decodeIfPresent(String.self, forKey: .copyrights)?.components(separatedBy: ", ")
         albumName = try container.decodeIfPresent(String.self, forKey: .albumName)
         artist = try container.decodeIfPresent(String.self, forKey: .artist)
         artwork = try container.decodeIfPresent(String.self, forKey: .artwork)
     }
+}
+
+public extension Downpour where MetadataType == ExifToolMetadata {
+        public var creation: Date? { return metadata.creation }
+        public var filetype: String? { return metadata.filetype }
+        public var copyrights: [String]? { return metadata.copyrights }
+        public var albumName: String? { return metadata.albumName }
+        public var artist: String? { return metadata.artist }
+        public var artwork: String? { return metadata.artwork }
 }
 #endif
