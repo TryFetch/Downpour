@@ -65,7 +65,7 @@ public extension Downpour where MetadataType: AVMetadata {
     public var creator: String? { return metadata.creator }
     public var subject: String? { return metadata.subject }
     public var summary: String? { return metadata.summary }
-    public var lastModifiedDate: Date? { return metadata.lastModifiedData }
+    public var lastModifiedDate: Date? { return metadata.lastModifiedDate }
     public var language: String? { return metadata.language }
     public var author: String? { return metadata.author }
 }

@@ -11,6 +11,11 @@ open class VideoMetadata: Metadata, CustomStringConvertible {
         case altEpisodeSingle = "Episode \\d{1,2}"
         case altSeason2 = "[\\s_\\.\\-\\[]\\d{3}[\\s_\\.\\-\\]]"
         case year = "[\\(?:\\.\\s_\\[](?:19|(?:[2-9])(?:[0-9]))\\d{2}[\\]\\s_\\.\\)]"
+
+        #if swift(>=4.2)
+        #else
+        static var allCases: [Pattern] = [.pretty, .tricky, .combined, .altSeason, .altSeasonSingle, .altEpisodeSingle, .altSeason2, .year]
+        #endif
     }
     public static let regexOptions: String.CompareOptions = [.regularExpression, .caseInsensitive]
 
