@@ -46,7 +46,7 @@ NOTE: None of the fields are guaranteed to be there or even picked up, it's kind
 ### Swift Package Manager:
 This supports SPM installation for swift 4.1+ by adding the following to your Package.swift dependencies:
 ```swift
-.package(url: "https://github.com/Ponyboy47/Downpour.git", from: "0.7.0")
+.package(url: "https://github.com/Ponyboy47/Downpour.git", from: "0.7.1")
 ```
 For swift 4.0 use 0.6.x
 For swift 3 use 0.4.x
