@@ -1,4 +1,4 @@
-// swift-tools-version:4.0
+// swift-tools-version:5.0
 
 import PackageDescription
 
@@ -8,8 +8,8 @@ let package = Package(
       .library(name: "Downpour", targets: ["Downpour"])
   ],
   dependencies: [
-      .package(url: "https://github.com/Ponyboy47/TrailBlazer.git", from: "0.11.0"),
-      .package(url: "https://github.com/kareman/SwiftShell.git", from: "4.1.0")
+      .package(url: "https://github.com/Ponyboy47/TrailBlazer.git", from: "0.15.0"),
+      .package(url: "https://github.com/Ponyboy47/SwiftShell.git", from: "4.2.0")
   ],
   targets: [
       .target(
