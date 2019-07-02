@@ -4,6 +4,7 @@ import PackageDescription
 
 let package = Package(
   name: "Downpour",
+  platforms: [.macOS(.v10_14)],
   products: [
       .library(name: "Downpour", targets: ["Downpour"])
   ],
