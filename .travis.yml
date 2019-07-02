@@ -1,7 +1,7 @@
 os:
   - linux
   - osx
-osx_image: xcode8.3
+osx_image: xcode10.2
 dist: trusty
 sudo: required
 language: generic
@@ -11,8 +11,9 @@ language: generic
 #before_install:
 #  - sudo apt-get update
 #  - sudo apt-get install -y libimage-exiftool-perl
+before_install:
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then eval "$(curl -sL https://swiftenv.fuller.li/install.sh)"; fi
 install:
-  - eval "$(curl -sL https://gist.githubusercontent.com/kylef/5c0475ff02b7c7671d2a/raw/9f442512a46d7a2af7b850d65a7e9bd31edfb09b/swiftenv-install.sh)"
+    - if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then swiftenv install $(cat .swift-version) | grep -qe "\(been\|already\) installed"; fi
 script:
-  - swift build -c release
-  - swift test
+  - travis_wait swift test

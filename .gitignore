@@ -31,8 +31,9 @@ xcuserdata
 timeline.xctimeline
 playground.xcworkspace
 
-## Vim swap files
-*.swp
+## Vim swap and session files
+*.sw[po]
+*.vimsession
 
 # Swift Package Manager
 #
@@ -40,6 +41,8 @@ playground.xcworkspace
 Packages/
 .build/
 Package.pins
+Package.resolved
+.AppleDouble
 
 # CocoaPods
 #
